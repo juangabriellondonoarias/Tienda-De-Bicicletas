@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: Bicicletas
+
+  datasource:
+    # Ajusta el host y puerto si es necesario; el nombre de la DB debe ser igual al que creaste
+    url: jdbc:mysql://localhost:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root        # Tu usuario de MySQL
+    password: JUAN1003 # Tu contraseña de MySQL
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      # 'update' valida y actualiza la estructura sin borrar tus datos existentes
+      ddl-auto: update
+    show-sql: true        # Muestra las consultas en consola para depuración
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
