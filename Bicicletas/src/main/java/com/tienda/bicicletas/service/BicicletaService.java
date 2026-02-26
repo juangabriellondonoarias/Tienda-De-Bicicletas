@@ -13,27 +13,30 @@ public class BicicletaService {
     @Autowired
     private BicicletaRepository bicicletaRepository;
 
-    public  List<Bicicleta> listarTodas(){
+    public List<Bicicleta> listarTodas() {
         return bicicletaRepository.findAll();
     }
 
-    public Optional<Bicicleta> buscarPorId(Integer id){
-        return  bicicletaRepository.findById(id);
+    public Optional<Bicicleta> buscarPorId(Integer id) {
+        return bicicletaRepository.findById(id);
     }
 
-    public Bicicleta guardar(Bicicleta bicicleta){
+    public Bicicleta guardar(Bicicleta bicicleta) {
         return bicicletaRepository.save(bicicleta);
     }
 
-    public void eliminar(Integer id){
+    public void eliminar(Integer id) {
         bicicletaRepository.deleteById(id);
     }
 
-    public Bicicleta actualizar(Integer id, Bicicleta bicicletaActualizada){
-        if (bicicletaRepository.existsById(id)){
+    public Bicicleta actualizar(Integer id, Bicicleta bicicletaActualizada) {
+        // 1. Verificamos si el ID existe en la base de datos
+        if (bicicletaRepository.existsById(id)) {
+            // 2. Le asignamos el ID de la ruta a la bicicleta que nos enviaron
             bicicletaActualizada.setIdBicicleta(id);
+            // 3. Guardamos (JPA hará UPDATE porque el ID ya existe)
             return bicicletaRepository.save(bicicletaActualizada);
         }
-        return null;
+        return null; // Retorna null si no existe
     }
 }
