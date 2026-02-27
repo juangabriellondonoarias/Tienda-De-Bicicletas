@@ -21,7 +21,7 @@ public class BicicletaService {
     private BicicletaMapper bicicletaMapper;
 
     public List<BicicletaResponseDTO> listarTodas() {
-        return bicicletaRepository.findAll().stream()
+        return bicicletaRepository.findByActivo("true").stream()
                 .map(bicicletaMapper::toResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -37,14 +37,16 @@ public class BicicletaService {
     }
 
     public void eliminar(Integer id) {
-        if (bicicletaRepository.existsById(id)) {
-            bicicletaRepository.deleteById(id);
-        }
+        bicicletaRepository.findById(id).ifPresent(bicicleta -> {
+            bicicleta.setActivo("false");
+            bicicletaRepository.save(bicicleta);
+        });
     }
 
     public Optional<BicicletaResponseDTO> actualizar(Integer id, BicicletaRequestDTO request) {
-        return bicicletaRepository.findById(id).map(existente -> {
-            // Aquí usas el Mapper para actualizar solo lo que viene en el DTO
+        // Cambiamos findById por findByIdAndActivo para ignorar las borradas
+        return bicicletaRepository.findByIdBicicletaAndActivo(id, "true").map(existente -> {
+            // MapStruct actualiza los campos permitidos
             bicicletaMapper.updateEntityFromDto(request, existente);
             return bicicletaMapper.toResponseDTO(bicicletaRepository.save(existente));
         });

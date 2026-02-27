@@ -65,14 +65,14 @@ public class BicicletaController {
             @ApiResponse(responseCode = "404", description = "No se encontró la bicicleta para actualizar")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<BicicletaResponseDTO> actualizar(@Valid @PathVariable Integer id, @RequestBody BicicletaRequestDTO request){
+    public ResponseEntity<BicicletaResponseDTO> actualizar(@PathVariable Integer id, @Valid @RequestBody BicicletaRequestDTO request){
         return bicicletaService.actualizar(id, request)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @Operation(summary = "Eliminar una bicicleta", description = "Elimina físicamente el registro de una bicicleta de la base de datos")
-    @ApiResponse(responseCode = "204", description = "Bicicleta eliminada correctamente")
+    @Operation(summary = "Desactiva una Bicicleta", description = "Desactiva una bicicleta")
+    @ApiResponse(responseCode = "204", description = "Bicicleta desactivada correctamente")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id){
         bicicletaService.eliminar(id);

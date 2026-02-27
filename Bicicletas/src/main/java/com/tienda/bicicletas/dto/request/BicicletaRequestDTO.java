@@ -4,6 +4,8 @@ import com.tienda.bicicletas.enums.TipoBicicleta;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @Getter
 @Setter
@@ -31,5 +33,5 @@ public class BicicletaRequestDTO {
 
     @NotNull(message = "El valor unitario es obligatorio")
     @Positive(message = "El precio debe ser mayor a cero(0)")
-    private Integer valorUnitario;
+    private BigDecimal valorUnitario;
 }
