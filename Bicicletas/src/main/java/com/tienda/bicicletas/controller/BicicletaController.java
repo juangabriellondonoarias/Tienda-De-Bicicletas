@@ -1,0 +1,81 @@
+package com.tienda.bicicletas.controller;
+
+import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
+import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
+import com.tienda.bicicletas.service.BicicletaService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/bicicletas")
+@CrossOrigin(origins = "*")
+@Tag(name = "Bicicletas", description = "Operaciones relacionadas con la gestion de bicicletas en la tienda ")
+public class BicicletaController {
+
+    @Autowired
+    private BicicletaService bicicletaService;
+
+    // Obtener todas las bicicletas
+    @Operation(summary = "Listar todas las bicicletas", description = "Obtiene una lista de todas las bicicletas registradas en el sistema")
+    @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente")
+    @GetMapping
+    public ResponseEntity<List<BicicletaResponseDTO>> listar(){
+        return ResponseEntity.ok(bicicletaService.listarTodas());
+    }
+
+    // Obtener una bicileta por su Id
+    @Operation(summary = "Obtener una bicicleta por ID", description = "Busca una bicicleta específica utilizando su identificador único")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bicicleta encontrada"),
+            @ApiResponse(responseCode = "404", description = "Bicicleta no encontrada", content = @Content)
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<BicicletaResponseDTO> obtenerPorId(@PathVariable Integer id){
+        return bicicletaService.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Crear una nueva bicicleta
+    @Operation(summary = "Crear una nueva bicicleta", description = "Registra una nueva bicicleta en el inventario. El stock inicial será 0.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Bicicleta creada exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
+    })
+    @PostMapping
+    public ResponseEntity<BicicletaResponseDTO> crear(@Valid @RequestBody BicicletaRequestDTO request){
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(bicicletaService.guardar(request));
+    }
+
+    // Actualizar una bicicleta existente
+    @Operation(summary = "Actualizar una bicicleta", description = "Actualiza la información de una bicicleta existente")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bicicleta actualizada"),
+            @ApiResponse(responseCode = "404", description = "No se encontró la bicicleta para actualizar")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<BicicletaResponseDTO> actualizar(@Valid @PathVariable Integer id, @RequestBody BicicletaRequestDTO request){
+        return bicicletaService.actualizar(id, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Operation(summary = "Eliminar una bicicleta", description = "Elimina físicamente el registro de una bicicleta de la base de datos")
+    @ApiResponse(responseCode = "204", description = "Bicicleta eliminada correctamente")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Integer id){
+        bicicletaService.eliminar(id);
+        return ResponseEntity.noContent().build();
+    }
+}
