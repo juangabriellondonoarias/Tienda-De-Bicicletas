@@ -3,6 +3,8 @@ package com.tienda.bicicletas.dto.response;
 import com.tienda.bicicletas.enums.TipoBicicleta;
 import lombok.*;
 
+import java.math.BigDecimal;
+
 @Data
 @Getter
 @Setter
@@ -17,6 +19,6 @@ public class BicicletaResponseDTO {
     private TipoBicicleta tipo;
     private Integer stock;
     private Integer stockMinimo;
-    private Integer valorUnitario;
+    private BigDecimal valorUnitario;
     private String activo;
 }

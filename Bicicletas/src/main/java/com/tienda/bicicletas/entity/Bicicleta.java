@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "bicicleta")
 @Data
@@ -32,8 +34,7 @@ public class Bicicleta {
     private Integer stockMinimo;
 
     @Column(name = "valor_unitario")
-    private Integer valorUnitario;
+    private BigDecimal valorUnitario;
 
-    private String activo;
-
+    private String activo = "true";
 }
