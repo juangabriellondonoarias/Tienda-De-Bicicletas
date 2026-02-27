@@ -1,11 +1,15 @@
 package com.tienda.bicicletas.service;
 
+import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
+import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
 import com.tienda.bicicletas.entity.Bicicleta;
+import com.tienda.bicicletas.mapper.BicicletaMapper;
 import com.tienda.bicicletas.repository.BicicletaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BicicletaService {
@@ -13,30 +17,36 @@ public class BicicletaService {
     @Autowired
     private BicicletaRepository bicicletaRepository;
 
-    public List<Bicicleta> listarTodas() {
-        return bicicletaRepository.findAll();
+    @Autowired
+    private BicicletaMapper bicicletaMapper;
+
+    public List<BicicletaResponseDTO> listarTodas() {
+        return bicicletaRepository.findAll().stream()
+                .map(bicicletaMapper::toResponseDTO)
+                .collect(Collectors.toList());
     }
 
-    public Optional<Bicicleta> buscarPorId(Integer id) {
-        return bicicletaRepository.findById(id);
+    public Optional<BicicletaResponseDTO> buscarPorId(Integer id) {
+        return bicicletaRepository.findById(id)
+                .map(bicicletaMapper::toResponseDTO);
     }
 
-    public Bicicleta guardar(Bicicleta bicicleta) {
-        return bicicletaRepository.save(bicicleta);
+    public BicicletaResponseDTO guardar(BicicletaRequestDTO request) {
+        Bicicleta entidad = bicicletaMapper.toEntity(request);
+        return bicicletaMapper.toResponseDTO(bicicletaRepository.save(entidad));
     }
 
     public void eliminar(Integer id) {
-        bicicletaRepository.deleteById(id);
+        if (bicicletaRepository.existsById(id)) {
+            bicicletaRepository.deleteById(id);
+        }
     }
 
-    public Bicicleta actualizar(Integer id, Bicicleta bicicletaActualizada) {
-        // 1. Verificamos si el ID existe en la base de datos
-        if (bicicletaRepository.existsById(id)) {
-            // 2. Le asignamos el ID de la ruta a la bicicleta que nos enviaron
-            bicicletaActualizada.setIdBicicleta(id);
-            // 3. Guardamos (JPA hará UPDATE porque el ID ya existe)
-            return bicicletaRepository.save(bicicletaActualizada);
-        }
-        return null; // Retorna null si no existe
+    public Optional<BicicletaResponseDTO> actualizar(Integer id, BicicletaRequestDTO request) {
+        return bicicletaRepository.findById(id).map(existente -> {
+            // Aquí usas el Mapper para actualizar solo lo que viene en el DTO
+            bicicletaMapper.updateEntityFromDto(request, existente);
+            return bicicletaMapper.toResponseDTO(bicicletaRepository.save(existente));
+        });
     }
 }
