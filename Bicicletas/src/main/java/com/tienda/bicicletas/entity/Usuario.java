@@ -2,6 +2,8 @@ package com.tienda.bicicletas.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuarios")
@@ -29,4 +31,13 @@ public class Usuario {
     private String email;
 
     private String password;
+
+    @Builder.Default
+    @ManyToMany(fetch = FetchType.EAGER) // para cargar los roles de inmedianto
+    @JoinTable(
+            name = "usuarios_roles",
+            joinColumns = @JoinColumn(name = "id_usuario"),
+            inverseJoinColumns = @JoinColumn(name = "id_rol")
+    )
+    private Set<Rol> roles = new HashSet<>();
 }

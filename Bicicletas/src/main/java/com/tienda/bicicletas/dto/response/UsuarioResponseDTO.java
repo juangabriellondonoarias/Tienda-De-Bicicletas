@@ -12,4 +12,5 @@ public class UsuarioResponseDTO {
     private String nombre;
     private String telefono;
     private String email;
+    private String rolNombre;
 }
