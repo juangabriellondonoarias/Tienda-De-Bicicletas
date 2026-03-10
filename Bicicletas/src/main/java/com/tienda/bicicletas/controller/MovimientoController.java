@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class MovimientoController {
     private MovimientoService movimientoService;
 
     @Operation(summary = "Registrar un movimiento", description = "Registra una entrada o salida de stock.El trigger de la DB actualizara el stock de la bicicleta automaticamente")
+    @PreAuthorize("hasRole('ADMIN')") // solo entra si el token dice ROLE_ADMIN
     @PostMapping
     public ResponseEntity<MovimientoResponseDTO> registrar(@Valid @RequestBody MovimientoRequestDTO request){
         return ResponseEntity.ok(movimientoService.registrar(request));
