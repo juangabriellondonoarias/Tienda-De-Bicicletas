@@ -19,7 +19,7 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "El correo es obligatorio")
     @Email(message = "Debe proporcionar un formato de correo valido")
     @Pattern(
-            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$",
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
             message = "El correo debe contener una '@' y un dominio con punto (ejemplo@core.com)"
     )
     private String email;
