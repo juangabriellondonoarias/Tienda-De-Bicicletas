@@ -19,8 +19,8 @@ public class UsuarioRequestDTO {
     @NotBlank(message = "El correo es obligatorio")
     @Email(message = "Debe proporcionar un formato de correo valido")
     @Pattern(
-            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\\\.[a-zA-Z]{2,}$",
-            message = "El correo debe contener una '@' y un dominio con punto (ejemplo@core.com)"
+            regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+            message = "El correo debe contener una '@' y un dominio con punto (ejemplo@correo.com)"
     )
     private String email;
 
@@ -28,7 +28,12 @@ public class UsuarioRequestDTO {
     @Size(max = 30, message = "El nombre no puede exceder los 30 caracteres")
     private String nombre;
 
-    @Size(max = 20, message = "El telefono no puede exceder los 20 caracteres")
+    @NotBlank(message = "El telefono es obligatorio")
+    @Size(max = 20, message = "El telefono no puede exceder los 10 caracteres")
+    @Pattern(
+            regexp = "^[0-9]{10}$",
+            message = "El teléfono debe tener exactamente 10 dígitos numéricos"
+    )
     private String telefono;
 
     @NotBlank(message = "La contraseña es obligatoria")
