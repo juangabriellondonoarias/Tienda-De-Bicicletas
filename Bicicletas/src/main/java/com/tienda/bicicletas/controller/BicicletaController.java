@@ -20,7 +20,7 @@ import java.util.List;
 @RequestMapping("/api/bicicletas")
 @CrossOrigin(origins = "*")
 @Tag(name = "Bicicletas", description = "Operaciones relacionadas con la gestion de bicicletas en la tienda ")
-public class BicicletaController {
+public class    BicicletaController {
 
     @Autowired
     private BicicletaService bicicletaService;
