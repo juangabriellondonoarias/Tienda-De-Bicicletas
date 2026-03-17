@@ -6,7 +6,7 @@ spring:
     # Ajusta el host y puerto si es necesario; el nombre de la DB debe ser igual al que creaste
     url: jdbc:mysql://localhost:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root        # Tu usuario de MySQL
-    password: Carlos2515. # Tu contraseña de MySQL
+    password:  # Tu contraseña de MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
