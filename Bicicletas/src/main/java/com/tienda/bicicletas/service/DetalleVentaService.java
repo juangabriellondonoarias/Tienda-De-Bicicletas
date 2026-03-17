@@ -35,13 +35,13 @@ public class DetalleVentaService {
                 .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada con el Id:  " + requestDTO.getIdVenta()));
 
         Bicicleta bicicleta = bicicletaRepository.findById(requestDTO.getIdBicicleta())
-                .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontyrada con Id: " + requestDTO.getIdBicicleta()));
+                .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada con Id: " + requestDTO.getIdBicicleta()));
 
         DetalleVenta nuevoDetalle = mapper.toEntity(requestDTO);
 
         nuevoDetalle.setBicicleta(bicicleta);
         nuevoDetalle.setVenta(venta);
-        nuevoDetalle.setBicicleta(bicicleta);
+
 
         // calcular el total
         BigDecimal total = requestDTO.getPrecioUnitario().multiply(new BigDecimal(requestDTO.getCantidad()));
