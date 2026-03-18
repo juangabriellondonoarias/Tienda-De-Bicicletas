@@ -11,7 +11,7 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {DetalleVentaMapper.class})
 public interface VentaMapper {
 
     @Mapping(source = "usuario.nombre", target = "nombreCliente")
@@ -25,6 +25,7 @@ public interface VentaMapper {
     @Mapping(target = "idVenta" , ignore = true)
     @Mapping(target = "fecha" , ignore = true)
     @Mapping(target = "usuario" , ignore = true)
+    @Mapping(target = "totalVenta", ignore = true)
     void updateEntityFromDTO(VentaRequestDTO dto, @MappingTarget Venta entidad);
 
     List<VentaResponseDTO> toResponseDTOList(List<Venta> ventas);
