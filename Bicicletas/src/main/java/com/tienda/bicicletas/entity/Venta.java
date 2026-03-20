@@ -23,9 +23,15 @@ public class Venta {
     @Column(name = "id_venta")
     private Integer idVenta;
 
+    // --- CAMBIO AQUÍ: El que compra ---
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", referencedColumnName = "id_usuario", nullable = false)
-    private Usuario usuario;
+    @JoinColumn(name = "id_cliente", referencedColumnName = "id_usuario", nullable = false)
+    private Usuario cliente;
+
+    // --- CAMBIO AQUÍ: El Admin que vende ---
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_vendedor", referencedColumnName = "id_usuario", nullable = false)
+    private Usuario vendedor;
 
     @Column(name= "fecha")
     @CreationTimestamp
@@ -34,14 +40,10 @@ public class Venta {
     @Column(name = "total_venta")
     private BigDecimal totalVenta;
 
-    /*@ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "Id_usuario", nullable = false)
-    private Usuario usuario;*/
-
-    // Voy a modificar aqui, pero esto no es mio
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<DetalleVenta> detalles;
 
+    // Método de utilidad para vincular padre e hijos
     public void agregarDetalle(DetalleVenta detalle){
         if (detalles == null){
             detalles = new java.util.ArrayList<>();

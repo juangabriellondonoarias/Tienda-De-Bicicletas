@@ -1,5 +1,6 @@
 package com.tienda.bicicletas.entity;
 
+import com.tienda.bicicletas.enums.TipoBicicleta;
 import com.tienda.bicicletas.enums.TipoMovimiento;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,4 +36,8 @@ public class Movimiento {
     @Builder.Default
     @Column(name = "fecha")
     private LocalDateTime fecha = LocalDateTime.now();
+
+    @Column(name = "proveedor" )
+    private String proveedor;
+
 }

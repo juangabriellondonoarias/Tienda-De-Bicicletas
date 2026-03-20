@@ -43,6 +43,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
 
+
                         // Gestión de Movimientos (Entradas y Salidas de bodega)
                         .requestMatchers("/api/movimientos/**").hasAuthority("ROLE_ADMIN")
 

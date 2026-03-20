@@ -13,24 +13,26 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface DetalleVentaMapper {
-    // extraemos la info de las relaciones
+    // 1. EL MÉTODO QUE TE FALTA (Este es el que busca el Service)
     @Mapping(source = "venta.idVenta", target = "idVenta")
     @Mapping(source = "bicicleta.modelo", target = "nombreBicicleta")
     DetalleVentaResponseDTO toResponseDTO(DetalleVenta detalleVenta);
 
+    // 2. La lista (usará automáticamente el mapeo de arriba)
     List<DetalleVentaResponseDTO> toResponseDTOList(List<DetalleVenta> detalles);
 
-
-    @Mapping(target = "idDetalleVenta" , ignore = true)
-    @Mapping(target = "venta" , ignore = true)
+    // 3. De DTO a Entidad (Para crear)
+    @Mapping(target = "idDetalleVenta", ignore = true)
+    @Mapping(target = "venta", ignore = true)
     @Mapping(target = "bicicleta", ignore = true)
-    @Mapping(target = "totalDetalle", ignore = true) // se calcula en servicio
+    @Mapping(target = "totalDetalle", ignore = true)
+    @Mapping(target = "cantidad", ignore = true)
     DetalleVenta toEntity(DetalleVentaRequestDTO rdto);
 
-
+    // 4. Para actualizar
     @Mapping(target = "idDetalleVenta", ignore = true)
-    @Mapping(target = "venta" , ignore = true)
+    @Mapping(target = "venta", ignore = true)
     @Mapping(target = "bicicleta", ignore = true)
-    @Mapping(target = "totalDetalle" , ignore = true)
+    @Mapping(target = "totalDetalle", ignore = true)
     void updateEntityFromDTO(DetalleVentaRequestDTO dto, @MappingTarget DetalleVenta entidad);
 }

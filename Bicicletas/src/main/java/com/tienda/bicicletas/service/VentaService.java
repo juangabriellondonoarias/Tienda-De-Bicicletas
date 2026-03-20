@@ -39,61 +39,63 @@ public class VentaService {
 
     @Transactional
     public VentaResponseDTO registrarVenta(VentaRequestDTO request) {
-        // 1. Validar que el usuario exista
-        Usuario usuario = usuarioRepository.findById(request.getIdUsuario())
-                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el usuario con el Id: " + request.getIdUsuario()));
 
-        // 2. Mapear DTO a Entidad (MapStruct crea la lista de detalles, pero vacíos de objetos complejos)
-        Venta nuevaVenta = ventaMapper.toEntity(request);
-        nuevaVenta.setUsuario(usuario);
+        // 1. Buscamos al Vendedor (Admin) por ID
+        Usuario vendedor = usuarioRepository.findById(request.getIdVendedor())
+                .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado"));
+
+        // 2. Buscamos al Cliente por su CÉDULA (Documento)
+        Usuario cliente = usuarioRepository.findByDocumento(request.getDocumentoCliente())
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con cédula: " + request.getDocumentoCliente()));
+
+        Venta nuevaVenta = new Venta();
+        nuevaVenta.setVendedor(vendedor);
+        nuevaVenta.setCliente(cliente);
         nuevaVenta.setFecha(LocalDate.now());
 
-        BigDecimal acumuladorTotalVenta = BigDecimal.ZERO;
+        BigDecimal acumuladorTotal = BigDecimal.ZERO;
 
-        // 3. Procesar cada detalle para cálculos y stock
-        if (nuevaVenta.getDetalles() != null && request.getDetalles() != null) {
+        for (DetalleVentaRequestDTO detalleDTO : request.getDetalles()) {
+            Bicicleta bicicleta = bicicletaRepository.findById(detalleDTO.getIdBicicleta())
+                    .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada"));
 
-            for (int i = 0; i < request.getDetalles().size(); i++) {
-                DetalleVentaRequestDTO detalleDTO = request.getDetalles().get(i);
-                DetalleVenta detalleEntidad = nuevaVenta.getDetalles().get(i);
+            // --- Lógica de Stock y Stock Mínimo (Ahora siempre restamos 1) ---
+            int stockActual = (bicicleta.getStock() != null) ? bicicleta.getStock() : 0;
+            int stockMinimo = (bicicleta.getStockMinimo() != null) ? bicicleta.getStockMinimo() : 0;
 
-                // A. Buscar la bicicleta por ID para obtener precio y stock real
-                Bicicleta bicicleta = bicicletaRepository.findById(detalleDTO.getIdBicicleta())
-                        .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada con Id: " + detalleDTO.getIdBicicleta()));
-
-                // B. VALIDACIÓN DE STOCK
-                if (bicicleta.getStock() < detalleDTO.getCantidad()) {
-                    throw new RuntimeException("Stock insuficiente para la bicicleta: " + bicicleta.getModelo() +
-                            ". Disponible: " + bicicleta.getStock());
-                }
-
-                // C. ACTUALIZAR STOCK (Restar lo vendido)
-                bicicleta.setStock(bicicleta.getStock() - detalleDTO.getCantidad());
-                bicicletaRepository.save(bicicleta);
-
-                // D. VINCULACIÓN BIDIRECCIONAL (Evita Error 500 y NullPointerException)
-                detalleEntidad.setVenta(nuevaVenta); // El hijo conoce al padre
-                detalleEntidad.setBicicleta(bicicleta); // El detalle conoce su producto
-
-                // E. CÁLCULO DE TOTALES (Seguridad: Usamos el precio de la DB, no del Front)
-                BigDecimal precioReal = bicicleta.getValorUnitario();
-                BigDecimal totalDelDetalle = precioReal.multiply(BigDecimal.valueOf(detalleDTO.getCantidad()));
-
-                detalleEntidad.setPrecioUnitario(precioReal);
-                detalleEntidad.setTotalDetalle(totalDelDetalle);
-
-                // Sumar al total de la factura
-                acumuladorTotalVenta = acumuladorTotalVenta.add(totalDelDetalle);
+            // CAMBIO: Validamos contra 1, no contra detalleDTO.getCantidad()
+            if (stockActual < 1) {
+                throw new IllegalArgumentException("No hay stock disponible para: " + bicicleta.getModelo());
             }
+
+            int stockFinal = stockActual - 1; // Siempre restamos 1
+            if (stockFinal < stockMinimo) {
+                throw new IllegalArgumentException("Venta bloqueada: El stock quedaría por debajo del mínimo (" + stockMinimo + ")");
+            }
+
+            bicicleta.setStock(stockFinal);
+            bicicletaRepository.save(bicicleta);
+
+            // --- Crear Detalle ---
+            DetalleVenta nuevoDetalle = new DetalleVenta();
+            nuevoDetalle.setBicicleta(bicicleta);
+            nuevoDetalle.setCantidad(1); // <--- CAMBIO: Seteamos 1 fijo
+
+            BigDecimal precio = bicicleta.getValorUnitario();
+            // El subtotal es igual al precio porque la cantidad es 1
+            BigDecimal subtotal = precio;
+
+            nuevoDetalle.setPrecioUnitario(precio);
+            nuevoDetalle.setTotalDetalle(subtotal);
+
+            nuevaVenta.agregarDetalle(nuevoDetalle);
+            acumuladorTotal = acumuladorTotal.add(subtotal);
         }
 
-        // 4. Asignar el total final calculado
-        nuevaVenta.setTotalVenta(acumuladorTotalVenta);
+        nuevaVenta.setTotalVenta(acumuladorTotal);
+        Venta guardada = ventaRepository.save(nuevaVenta);
 
-        // 5. Guardar la venta (CascadeType.ALL guarda los detalles automáticamente)
-        Venta ventaGuardada = ventaRepository.save(nuevaVenta);
-
-        return ventaMapper.toResponseDTO(ventaGuardada);
+        return ventaMapper.toResponseDTO(guardada);
     }
 
     @Transactional(readOnly = true)
@@ -114,20 +116,44 @@ public class VentaService {
         Venta ventaExistente = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró venta por el id: " + id));
 
-        if (requestDTO.getIdUsuario() != null) {
-            Usuario nuevoUsuario = usuarioRepository.findById(requestDTO.getIdUsuario())
-                    .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con el id: " + requestDTO.getIdUsuario()));
-            ventaExistente.setUsuario(nuevoUsuario);
+        // 1. Actualizar Cliente por Documento
+        if (requestDTO.getDocumentoCliente() != null) {
+            Usuario nuevoCliente = usuarioRepository.findByDocumento(requestDTO.getDocumentoCliente())
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con cédula: " + requestDTO.getDocumentoCliente()));
+            ventaExistente.setCliente(nuevoCliente);
         }
 
-        ventaMapper.updateEntityFromDTO(requestDTO, ventaExistente);
-        return ventaMapper.toResponseDTO(ventaRepository.save(ventaExistente));
+        // 2. Actualizar Vendedor por ID
+        if (requestDTO.getIdVendedor() != null) {
+            Usuario nuevoVendedor = usuarioRepository.findById(requestDTO.getIdVendedor())
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con ID: " + requestDTO.getIdVendedor()));
+            ventaExistente.setVendedor(nuevoVendedor);
+        }
+
+        // Guardamos y devolvemos el ResponseDTO con los nombres nuevos
+        Venta ventaGuardada = ventaRepository.save(ventaExistente);
+        return ventaMapper.toResponseDTO(ventaGuardada);
     }
 
     @Transactional
     public void eliminarLaVenta(Integer id) {
         Venta ventaExistente = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada con Id: " + id));
+
+        // MAGIA DE INVENTARIO: Devolver el stock a la tienda
+        if (ventaExistente.getDetalles() != null) {
+            for (DetalleVenta detalle : ventaExistente.getDetalles()) {
+                Bicicleta bicicleta = detalle.getBicicleta();
+
+                // Sumamos lo que el cliente devuelve al stock actual
+                int stockDevuelto = (bicicleta.getStock() != null ? bicicleta.getStock() : 0) + detalle.getCantidad();
+                bicicleta.setStock(stockDevuelto);
+
+                bicicletaRepository.save(bicicleta);
+            }
+        }
+
+        // Borramos la factura y sus detalles (CascadeType.ALL)
         ventaRepository.delete(ventaExistente);
     }
 }

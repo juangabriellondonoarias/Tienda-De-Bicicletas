@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 //import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
@@ -32,9 +33,13 @@ public class DetalleVentaController {
             @ApiResponse(responseCode = "201" , description = "Se creo correctamente"),
             @ApiResponse(responseCode = "400" , description = "Datos de entrada invalidos")
     })
-    @PostMapping
-    public ResponseEntity<DetalleVentaResponseDTO> crear (@RequestBody DetalleVentaRequestDTO requestDTO){
-        return new ResponseEntity<>(service.registrarDetalle(requestDTO), HttpStatus.CREATED);
+    @PostMapping("/{idVenta}/detalles")
+    public ResponseEntity<DetalleVentaResponseDTO> crear(
+            @PathVariable Integer idVenta,
+            @Valid @RequestBody DetalleVentaRequestDTO requestDTO){
+
+        // ¡Aquí está la magia! Le pasamos los DOS parámetros al servicio
+        return new ResponseEntity<>(service.registrarDetalle(idVenta, requestDTO), HttpStatus.CREATED);
     }
 
     @Operation(summary = "Obtener todos los detalles" , description = "se obtinen todos los detalles de venta")

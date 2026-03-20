@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BicicletaService {
@@ -31,9 +32,30 @@ public class BicicletaService {
                 .map(bicicletaMapper::toResponseDTO);
     }
 
-    public BicicletaResponseDTO guardar(BicicletaRequestDTO request) {
+    /*public BicicletaResponseDTO guardar(BicicletaRequestDTO request) {
         Bicicleta entidad = bicicletaMapper.toEntity(request);
         return bicicletaMapper.toResponseDTO(bicicletaRepository.save(entidad));
+    }*/
+
+    @Transactional
+    public void registrarBicicletas(List<BicicletaRequestDTO> listaBicicletas) {
+
+        for (BicicletaRequestDTO dto : listaBicicletas) {
+
+            // Creamos la entidad vacía
+            Bicicleta nuevaBici = new Bicicleta();
+
+            // La llenamos con los datos que vienen del DTO
+            nuevaBici.setCodigo(dto.getCodigo());
+            nuevaBici.setMarca(dto.getMarca());
+            nuevaBici.setModelo(dto.getModelo());
+            nuevaBici.setTipo(dto.getTipo());
+            nuevaBici.setStockMinimo(dto.getStockMinimo());
+            nuevaBici.setValorUnitario(dto.getValorUnitario());
+
+            // Guardamos en la base de datos
+            bicicletaRepository.save(nuevaBici);
+        }
     }
 
     public void eliminar(Integer id) {

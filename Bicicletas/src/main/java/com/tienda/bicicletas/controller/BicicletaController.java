@@ -47,7 +47,7 @@ public class    BicicletaController {
     }
 
     // Crear una nueva bicicleta
-    @Operation(summary = "Crear una nueva bicicleta", description = "Registra una nueva bicicleta en el inventario. El stock inicial será 0.")
+   /* @Operation(summary = "Crear una nueva bicicleta", description = "Registra una nueva bicicleta en el inventario. El stock inicial será 0.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Bicicleta creada exitosamente"),
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
@@ -56,6 +56,18 @@ public class    BicicletaController {
     public ResponseEntity<BicicletaResponseDTO> crear(@Valid @RequestBody BicicletaRequestDTO request){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bicicletaService.guardar(request));
+    }*/
+
+    @Operation(summary = "Crear una nueva bicicleta", description = "Registra una nueva bicicleta en el inventario. El stock inicial será 0.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Bicicleta creada exitosamente"),
+            @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
+    })
+
+    @PostMapping("/lote-Bicicleta")
+    public ResponseEntity<String>registrarBicicletas(@RequestBody List<BicicletaRequestDTO> bicicletas){
+        bicicletaService.registrarBicicletas(bicicletas);
+        return ResponseEntity.ok("Se registraron" + bicicletas.size() + " bicicletas correctamente");
     }
 
     // Actualizar una bicicleta existente

@@ -1,9 +1,14 @@
 package com.tienda.bicicletas.controller;
 
+//import com.tienda.bicicletas.dto.request.CompradoLoteRequestDTO;
 import com.tienda.bicicletas.dto.request.MovimientoRequestDTO;
 import com.tienda.bicicletas.dto.response.MovimientoResponseDTO;
 import com.tienda.bicicletas.service.MovimientoService;
 import io.swagger.v3.oas.annotations.Operation;
+//import io.swagger.v3.oas.annotations.responses.ApiResponse;
+//import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +29,14 @@ public class MovimientoController {
 
     @Operation(summary = "Registrar un movimiento", description = "Registra una entrada o salida de stock.El trigger de la DB actualizara el stock de la bicicleta automaticamente")
     @PreAuthorize("hasRole('ADMIN')") // solo entra si el token dice ROLE_ADMIN
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201" , description = "Se creo exitosamente"),
+            @ApiResponse(responseCode = "400" , description = "Datos invalidos")
+    })
     @PostMapping
-    public ResponseEntity<MovimientoResponseDTO> registrar(@Valid @RequestBody MovimientoRequestDTO request){
-        return ResponseEntity.ok(movimientoService.registrar(request));
+    public ResponseEntity<String> registrar(@Valid @RequestBody MovimientoRequestDTO request){
+        movimientoService.registrar(request);
+        return ResponseEntity.ok("Movimiento registrado correctamente");
     }
 
     @Operation(summary = "Listar historial de moviminetos", description = "Obtiene una lista de todos los movimientos (entradas y salidas) registrados")
@@ -34,4 +44,19 @@ public class MovimientoController {
     public ResponseEntity<List<MovimientoResponseDTO>> listar(){
         return ResponseEntity.ok(movimientoService.listarTodos());
     }
+
+    @GetMapping("/cantidad-comprada")
+    public ResponseEntity<Integer>cantidadProveedor(
+            @RequestParam String proveedor,
+            @RequestParam String modelo){
+        Integer cantidad = movimientoService.consultarCantidad(proveedor, modelo);
+        return ResponseEntity.ok(cantidad);
+    }
+
+    /*
+    @PostMapping("/lote")
+    public ResponseEntity<String>movimientosLote(@RequestBody MovimientoRequestDTO loteRequestDTO){
+            movimientoService.movimientoLote(loteRequestDTO);
+            return ResponseEntity.ok("Se registra lote correctamente");
+    }*/
 }
