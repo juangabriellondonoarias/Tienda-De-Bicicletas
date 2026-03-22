@@ -70,10 +70,11 @@ public class MovimientoService {
                 .collect(Collectors.toList());
     }
 
-    public Integer consultarCantidad(String proveedor , String modelo){
-        Integer total= movimientoRepository.cantidadProveedor(proveedor , modelo);
+    public List<Object[]> consultarProveedor(String proveedor) {
+        // Llamamos al nuevo método del repositorio que usa GROUP BY
+        List<Object[]> reporte = movimientoRepository.reporteCantidadesPorTipo(proveedor);
 
-        return total != null ? total : 0;
+        return reporte;
     }
 
     @Transactional

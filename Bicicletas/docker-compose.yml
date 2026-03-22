@@ -1,0 +1,60 @@
+version: "3.9"
+
+services:
+  # --- 1. BASE DE DATOS (MySQL) ---
+  db:
+    image: mysql:8.0
+    container_name: products-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: Carlos2515.
+      MYSQL_DATABASE: tiendaBicicletas
+      MYSQL_USER: juanycarlos
+      MYSQL_PASSWORD: JuanYCarlos2026
+    ports:
+      - "3307:3306" # Acceso externo desde Workbench en el 3307
+    volumes:
+      - db_data:/var/lib/mysql
+      # Carga automática de tu script SQL (Asegúrate que la ruta a tu schema.sql sea correcta)
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --- 2. ADMINISTRADOR VISUAL (phpMyAdmin) ---
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: Carlos2515.
+    ports:
+      - "8081:80" # Acceso en http://localhost:8081
+
+  # --- 3. TU APLICACIÓN (Spring Boot) ---
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: products-api
+    depends_on:
+      db:
+        condition: service_healthy # Espera a que el healthcheck de la DB pase
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      # Datos de conexión coincidiendo con los de arriba
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: juanycarlos
+      SPRING_DATASOURCE_PASSWORD: JuanYCarlos2026
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+
+volumes:
+  db_data:

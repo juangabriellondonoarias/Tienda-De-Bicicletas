@@ -46,11 +46,8 @@ public class MovimientoController {
     }
 
     @GetMapping("/cantidad-comprada")
-    public ResponseEntity<Integer>cantidadProveedor(
-            @RequestParam String proveedor,
-            @RequestParam String modelo){
-        Integer cantidad = movimientoService.consultarCantidad(proveedor, modelo);
-        return ResponseEntity.ok(cantidad);
+    public ResponseEntity<List<Object[]>> consultar(@RequestParam String proveedor) {
+        return ResponseEntity.ok(movimientoService.consultarProveedor(proveedor));
     }
 
     /*
