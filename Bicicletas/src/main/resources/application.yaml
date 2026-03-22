@@ -4,9 +4,9 @@ spring:
 
   datasource:
     # Ajusta el host y puerto si es necesario; el nombre de la DB debe ser igual al que creaste
-    url: jdbc:mysql://localhost:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: root        # Tu usuario de MySQL
-    password: JUAN1003 # Tu contraseña de MySQL
+    url: jdbc:mysql://db:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: juanycarlos       # Tu usuario de MySQL
+    password: JuanYCarlos2026 # Tu contraseña de MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -18,3 +18,10 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+security:
+  jwt:
+    # Esta es la frase "tienda-bicicletas-..."
+    # (Asegúrate de poner tu clave real aquí)
+    secret-key: dGllbmRhLWJpY2ljbGV0YXMtc2VjcmV0LWtleS0yMDI2LXNlbmE=
+    # Expiracion: 3600000 ms = 1 hora
+    token-expiration: 3600000
