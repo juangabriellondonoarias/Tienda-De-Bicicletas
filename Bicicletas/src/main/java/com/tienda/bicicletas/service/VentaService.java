@@ -1,5 +1,6 @@
 package com.tienda.bicicletas.service;
 
+import com.tienda.bicicletas.dto.request.CompraClienteRequestDTO;
 import com.tienda.bicicletas.dto.request.VentaRequestDTO;
 import com.tienda.bicicletas.dto.request.DetalleVentaRequestDTO;
 import com.tienda.bicicletas.dto.response.VentaResponseDTO;
@@ -37,16 +38,31 @@ public class VentaService {
         this.ventaMapper = ventaMapper;
     }
 
+    // --- 1. REGISTRO POR VENDEDOR (Venta Asistida) ---
     @Transactional
     public VentaResponseDTO registrarVenta(VentaRequestDTO request) {
-
-        // 1. Buscamos al Vendedor (Admin) por ID
         Usuario vendedor = usuarioRepository.findById(request.getIdVendedor())
-                .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con ID: " + request.getIdVendedor()));
 
-        // 2. Buscamos al Cliente por su CÉDULA (Documento)
-        Usuario cliente = usuarioRepository.findByDocumento(request.getDocumentoCliente())
-                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con cédula: " + request.getDocumentoCliente()));
+        // Aquí pasamos el documento, el vendedor y LA LISTA de detalles
+        return procesarVentaBase(request.getDocumentoCliente(), vendedor, request.getDetalles());
+    }
+
+    // --- 2. COMPRA DIRECTA DEL CLIENTE (E-commerce) ---
+    @Transactional
+    public VentaResponseDTO registrarCompraDirecta(CompraClienteRequestDTO request) {
+        // Buscamos un usuario que represente al "SISTEMA" o "TIENDA VIRTUAL"
+        // Supongamos que el ID 1 es tu administrador o tienda virtual
+        Usuario vendedorSistema = usuarioRepository.findById(1)
+                .orElse(null);
+
+        return procesarVentaBase(request.getDocumentoCliente(), vendedorSistema, request.getDetalles());
+    }
+
+    // --- 3. LÓGICA CENTRALIZADA (Atómica y Segura) ---
+    private VentaResponseDTO procesarVentaBase(String documento, Usuario vendedor, List<DetalleVentaRequestDTO> detallesDTO) {
+        Usuario cliente = usuarioRepository.findByDocumento(documento)
+                .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con documento: " + documento));
 
         Venta nuevaVenta = new Venta();
         nuevaVenta.setVendedor(vendedor);
@@ -55,35 +71,30 @@ public class VentaService {
 
         BigDecimal acumuladorTotal = BigDecimal.ZERO;
 
-        for (DetalleVentaRequestDTO detalleDTO : request.getDetalles()) {
+        for (DetalleVentaRequestDTO detalleDTO : detallesDTO) {
             Bicicleta bicicleta = bicicletaRepository.findById(detalleDTO.getIdBicicleta())
-                    .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada con ID: " + detalleDTO.getIdBicicleta()));
 
-            // --- Lógica de Stock y Stock Mínimo (Ahora siempre restamos 1) ---
+            int cantidadSolicitada = (detalleDTO.getCantidad() != null) ? detalleDTO.getCantidad() : 1;
+
+            // Validación de Stock
             int stockActual = (bicicleta.getStock() != null) ? bicicleta.getStock() : 0;
-            int stockMinimo = (bicicleta.getStockMinimo() != null) ? bicicleta.getStockMinimo() : 0;
-
-            // CAMBIO: Validamos contra 1, no contra detalleDTO.getCantidad()
-            if (stockActual < 1) {
-                throw new IllegalArgumentException("No hay stock disponible para: " + bicicleta.getModelo());
+            if (stockActual < cantidadSolicitada) {
+                throw new IllegalArgumentException("Stock insuficiente para: " + bicicleta.getModelo() +
+                        ". Disponible: " + stockActual);
             }
 
-            int stockFinal = stockActual - 1; // Siempre restamos 1
-            if (stockFinal < stockMinimo) {
-                throw new IllegalArgumentException("Venta bloqueada: El stock quedaría por debajo del mínimo (" + stockMinimo + ")");
-            }
-
-            bicicleta.setStock(stockFinal);
+            // Restar stock
+            bicicleta.setStock(stockActual - cantidadSolicitada);
             bicicletaRepository.save(bicicleta);
 
-            // --- Crear Detalle ---
+            // Crear el detalle
             DetalleVenta nuevoDetalle = new DetalleVenta();
             nuevoDetalle.setBicicleta(bicicleta);
-            nuevoDetalle.setCantidad(1); // <--- CAMBIO: Seteamos 1 fijo
+            nuevoDetalle.setCantidad(cantidadSolicitada);
 
             BigDecimal precio = bicicleta.getValorUnitario();
-            // El subtotal es igual al precio porque la cantidad es 1
-            BigDecimal subtotal = precio;
+            BigDecimal subtotal = precio.multiply(new BigDecimal(cantidadSolicitada));
 
             nuevoDetalle.setPrecioUnitario(precio);
             nuevoDetalle.setTotalDetalle(subtotal);
@@ -98,10 +109,11 @@ public class VentaService {
         return ventaMapper.toResponseDTO(guardada);
     }
 
+    // --- OTROS MÉTODOS ---
+
     @Transactional(readOnly = true)
     public List<VentaResponseDTO> obtenerLasVentas() {
-        List<Venta> ventas = ventaRepository.findAll();
-        return ventaMapper.toResponseDTOList(ventas);
+        return ventaMapper.toResponseDTOList(ventaRepository.findAll());
     }
 
     @Transactional(readOnly = true)
@@ -116,23 +128,19 @@ public class VentaService {
         Venta ventaExistente = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró venta por el id: " + id));
 
-        // 1. Actualizar Cliente por Documento
         if (requestDTO.getDocumentoCliente() != null) {
             Usuario nuevoCliente = usuarioRepository.findByDocumento(requestDTO.getDocumentoCliente())
-                    .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con cédula: " + requestDTO.getDocumentoCliente()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado"));
             ventaExistente.setCliente(nuevoCliente);
         }
 
-        // 2. Actualizar Vendedor por ID
         if (requestDTO.getIdVendedor() != null) {
             Usuario nuevoVendedor = usuarioRepository.findById(requestDTO.getIdVendedor())
-                    .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con ID: " + requestDTO.getIdVendedor()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado"));
             ventaExistente.setVendedor(nuevoVendedor);
         }
 
-        // Guardamos y devolvemos el ResponseDTO con los nombres nuevos
-        Venta ventaGuardada = ventaRepository.save(ventaExistente);
-        return ventaMapper.toResponseDTO(ventaGuardada);
+        return ventaMapper.toResponseDTO(ventaRepository.save(ventaExistente));
     }
 
     @Transactional
@@ -140,20 +148,14 @@ public class VentaService {
         Venta ventaExistente = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta no encontrada con Id: " + id));
 
-        // MAGIA DE INVENTARIO: Devolver el stock a la tienda
         if (ventaExistente.getDetalles() != null) {
             for (DetalleVenta detalle : ventaExistente.getDetalles()) {
                 Bicicleta bicicleta = detalle.getBicicleta();
-
-                // Sumamos lo que el cliente devuelve al stock actual
-                int stockDevuelto = (bicicleta.getStock() != null ? bicicleta.getStock() : 0) + detalle.getCantidad();
-                bicicleta.setStock(stockDevuelto);
-
+                bicicleta.setStock(bicicleta.getStock() + detalle.getCantidad());
                 bicicletaRepository.save(bicicleta);
             }
         }
-
-        // Borramos la factura y sus detalles (CascadeType.ALL)
         ventaRepository.delete(ventaExistente);
     }
+
 }

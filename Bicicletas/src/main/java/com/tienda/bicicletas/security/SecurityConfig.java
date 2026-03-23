@@ -30,27 +30,28 @@ public class SecurityConfig {
                         // 1. RUTAS PÚBLICAS: Login, Registro y Documentación
                         .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
-                        // 2. PERMISOS DE CLIENTE (Y ADMIN): Lo que el cliente PUEDE hacer
-                        // Listar bicicletas (GET)
-                        .requestMatchers(HttpMethod.GET, "/api/bicicletas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
-                        // Crear su propia venta (POST) y ver su historial (GET)
-                        .requestMatchers(HttpMethod.GET, "/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
-                        .requestMatchers(HttpMethod.POST, "/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
+                        // --- CAMBIOS AQUÍ: REGLAS ESPECÍFICAS DE VENTAS ---
 
-                        // 3. PERMISOS EXCLUSIVOS DE ADMIN: Todo lo demás
-                        // Gestión de Inventario (Crear, Editar, Eliminar Bicicletas)
+                        // Solo el ADMIN/VENDEDOR puede registrar ventas por la ruta de vendedor
+                        .requestMatchers(HttpMethod.POST, "/api/ventas/vendedor/**").hasAuthority("ROLE_ADMIN")
+
+                        // El CLIENTE (y Admin) solo puede usar la ruta de cliente
+                        .requestMatchers(HttpMethod.POST, "/api/ventas/cliente/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
+
+                        // Ver el historial de ventas (GET) disponible para ambos
+                        .requestMatchers(HttpMethod.GET, "/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
+
+                        // ------------------------------------------------
+
+                        // 2. PERMISOS DE BICICLETAS
+                        .requestMatchers(HttpMethod.GET, "/api/bicicletas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
 
-
-                        // Gestión de Movimientos (Entradas y Salidas de bodega)
+                        // 3. GESTIÓN DE MOVIMIENTOS Y USUARIOS (Solo Admin)
                         .requestMatchers("/api/movimientos/**").hasAuthority("ROLE_ADMIN")
-
-                        // Gestión de Usuarios (CRUD interno de empleados/clientes)
                         .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
-
-                        // Gestión de Detalles de Venta (Si se usa de forma individual)
                         .requestMatchers("/api/detalles-ventas/**").hasAuthority("ROLE_ADMIN")
 
                         // 4. CUALQUIER OTRA RUTA: Requiere Admin por seguridad

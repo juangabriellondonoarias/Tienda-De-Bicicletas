@@ -28,7 +28,7 @@ public class DetalleVentaController {
 
     // se hace el contructor de DetalleVentaService pero lo hacemos con la anotacion @AllArgsConstructor
 
-    @Operation(summary = "Crear" , description = "se crea un detalle de venta")
+    /*@Operation(summary = "Crear" , description = "se crea un detalle de venta")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201" , description = "Se creo correctamente"),
             @ApiResponse(responseCode = "400" , description = "Datos de entrada invalidos")
@@ -40,13 +40,14 @@ public class DetalleVentaController {
 
         // ¡Aquí está la magia! Le pasamos los DOS parámetros al servicio
         return new ResponseEntity<>(service.registrarDetalle(idVenta, requestDTO), HttpStatus.CREATED);
-    }
+    }*/
 
     @Operation(summary = "Obtener todos los detalles" , description = "se obtinen todos los detalles de venta")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200" , description = "Se obtienen correctamente todos los detalles de venta"),
             @ApiResponse(responseCode = "404" , description = "No se encontraron los detalles de ventas")
     })
+
     @GetMapping
     public ResponseEntity<List<DetalleVentaResponseDTO>> obtenerTodo(){
         return new ResponseEntity<>(service.obtenerTodo(), HttpStatus.OK);
@@ -62,7 +63,7 @@ public class DetalleVentaController {
         return new ResponseEntity<>(service.obtenerPorId(id) , HttpStatus.OK);
     }
 
-    @Operation(summary = "Actualizar detalle venta" ,  description = "se actualiza el detalle de venta")
+   /* @Operation(summary = "Actualizar detalle venta" ,  description = "se actualiza el detalle de venta")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200" ,description = "Se actualizo correctamente el detalle venta"),
             @ApiResponse(responseCode = "404" , description = "No se encontro detalle venta para actualizar")
@@ -70,7 +71,8 @@ public class DetalleVentaController {
     @PutMapping("/{id}")
     public ResponseEntity<DetalleVentaResponseDTO>actualizar(@PathVariable Integer id , @RequestBody DetalleVentaRequestDTO requestDTO){
         return new ResponseEntity<>(service.actualizarDetalle(id,requestDTO), HttpStatus.OK);
-    }
+    }*/
+
     @Operation(summary = "Eliminar por Id" , description = "Se elimina un detalle venta por Id")
     @ApiResponse(responseCode = "204" , description = "Se desactivo correctamente el detalle venta")
     @DeleteMapping("/{id}")
