@@ -3,7 +3,6 @@ package com.tienda.bicicletas.dto.request;
 import com.tienda.bicicletas.enums.TipoBicicleta;
 import jakarta.validation.constraints.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 
 @Data

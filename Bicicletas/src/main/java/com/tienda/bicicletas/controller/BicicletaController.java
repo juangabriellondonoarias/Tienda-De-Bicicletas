@@ -1,5 +1,4 @@
 package com.tienda.bicicletas.controller;
-
 import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
 import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
 import com.tienda.bicicletas.service.BicicletaService;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
