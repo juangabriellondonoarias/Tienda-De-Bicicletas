@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   # --- 1. BASE DE DATOS (MySQL) ---
-  db:
+  products-mysql:
     image: mysql:8.0
     container_name: products-mysql
     restart: unless-stopped
@@ -29,9 +29,9 @@ services:
     container_name: phpmyadmin
     restart: unless-stopped
     depends_on:
-      - db
+      - products-mysql
     environment:
-      PMA_HOST: db
+      PMA_HOST: products-mysql
       PMA_USER: root
       PMA_PASSWORD: Carlos2515.
     ports:
@@ -44,12 +44,12 @@ services:
       dockerfile: Dockerfile
     container_name: products-api
     depends_on:
-      db:
+      products-mysql:
         condition: service_healthy # Espera a que el healthcheck de la DB pase
     environment:
       SPRING_PROFILES_ACTIVE: docker
       # Datos de conexión coincidiendo con los de arriba
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://products-mysql:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: juanycarlos
       SPRING_DATASOURCE_PASSWORD: JuanYCarlos2026
     ports:

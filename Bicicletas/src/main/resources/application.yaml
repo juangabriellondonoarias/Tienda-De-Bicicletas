@@ -4,7 +4,7 @@ spring:
 
   datasource:
     # Ajusta el host y puerto si es necesario; el nombre de la DB debe ser igual al que creaste
-    url: jdbc:mysql://db:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://products-mysql:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: juanycarlos       # Tu usuario de MySQL
     password: JuanYCarlos2026 # Tu contraseña de MySQL
     driver-class-name: com.mysql.cj.jdbc.Driver

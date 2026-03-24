@@ -18,7 +18,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bicicletas")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "http://localhost:4200") // Permiso explícito para Angular
 @Tag(name = "Bicicletas", description = "Operaciones relacionadas con la gestion de bicicletas en la tienda ")
 public class    BicicletaController {
 
