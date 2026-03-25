@@ -7,7 +7,7 @@ services:
     container_name: products-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: Carlos2515.
+      MYSQL_ROOT_PASSWORD:
       MYSQL_DATABASE: tiendaBicicletas
       MYSQL_USER: juanycarlos
       MYSQL_PASSWORD: JuanYCarlos2026
@@ -33,7 +33,7 @@ services:
     environment:
       PMA_HOST: products-mysql
       PMA_USER: root
-      PMA_PASSWORD: Carlos2515.
+      PMA_PASSWORD:
     ports:
       - "8081:80" # Acceso en http://localhost:8081
 

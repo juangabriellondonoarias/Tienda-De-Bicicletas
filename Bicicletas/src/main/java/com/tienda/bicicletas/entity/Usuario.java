@@ -21,6 +21,9 @@ public class Usuario {
     @Column(unique = true, length = 20)
     private String documento;
 
+    @Column(name = "activo")
+    private Boolean activo = true;
+
     @Column(length = 20)
     private String telefono;
 

@@ -2,8 +2,10 @@ package com.tienda.bicicletas.service;
 
 import com.tienda.bicicletas.dto.request.UsuarioRequestDTO;
 import com.tienda.bicicletas.dto.response.UsuarioResponseDTO;
+import com.tienda.bicicletas.entity.Rol;
 import com.tienda.bicicletas.entity.Usuario;
 import com.tienda.bicicletas.mapper.UsuarioMapper;
+import com.tienda.bicicletas.repository.RolRepository;
 import com.tienda.bicicletas.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,10 +25,14 @@ public class UsuarioService {
     private UsuarioMapper usuarioMapper;
 
     @Autowired
+    private RolRepository rolRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder; // Inyectamos el encriptador
 
     public List<UsuarioResponseDTO> listarTodos(){
         return usuarioRepository.findAll().stream()
+                .filter(u -> u.getActivo() == null || u.getActivo())
                 .map(usuarioMapper::toResposeDTO)
                 .collect(Collectors.toList());
     }
@@ -36,17 +42,26 @@ public class UsuarioService {
                 .map(usuarioMapper::toResposeDTO);
     }
 
-    public UsuarioResponseDTO guardar(UsuarioRequestDTO request){
+    public UsuarioResponseDTO guardar(UsuarioRequestDTO request) {
         Usuario entidad = usuarioMapper.toEntity(request);
 
-        // Encriptamos la contraseña antes de guardar
+        // 🔔 SOLUCIÓN: Buscar el rol manualmente y asignarlo a la entidad
+        // ya que el Mapper lo tiene como "ignore = true"
+        Rol rol = rolRepository.findById(request.getIdRol())
+                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+        entidad.getRoles().add(rol);
         entidad.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return usuarioMapper.toResposeDTO(usuarioRepository.save(entidad));
     }
 
     public void eliminar(Integer id){
-        usuarioRepository.deleteById(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setActivo(false); // 👈 Lo marcamos como inactivo
+        usuarioRepository.save(usuario); // Guardamos el cambio, NO lo borramos
     }
 
     public Optional<UsuarioResponseDTO> actualizar(Integer id, UsuarioRequestDTO request){
@@ -54,10 +69,19 @@ public class UsuarioService {
                 .map(existente -> {
                     usuarioMapper.updateEntityFromDto(request, existente);
 
-                    // si el request trae una nueva contraseña, la encriptamos
+                    // 🚀 BUSCAMOS Y ASIGNAMOS EL ROL MANUALMENTE
+                    if (request.getIdRol() != null) {
+                        Rol nuevoRol = rolRepository.findById(request.getIdRol())
+                                .orElseThrow(() -> new RuntimeException("Rol no encontrado"));
+
+                        existente.getRoles().clear();
+                        existente.getRoles().add(nuevoRol);
+                    }
+
                     if(request.getPassword() != null && !request.getPassword().isBlank()){
                         existente.setPassword(passwordEncoder.encode(request.getPassword()));
                     }
+
                     return usuarioMapper.toResposeDTO(usuarioRepository.save(existente));
                 });
     }
