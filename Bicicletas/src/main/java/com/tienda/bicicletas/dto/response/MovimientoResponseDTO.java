@@ -17,4 +17,5 @@ public class MovimientoResponseDTO {
     private TipoMovimiento tipo;
     private Integer cantidad;
     private LocalDateTime fecha;
+    private String proveedor;
 }

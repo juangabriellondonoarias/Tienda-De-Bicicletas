@@ -8,7 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
-    // Validar que no se repita documento en el registro
     Optional<Usuario> findByDocumento(String documento);
     Optional<Usuario> findByEmail(String email);
+    Optional<Usuario> findByResetToken(String resetToken);
 }

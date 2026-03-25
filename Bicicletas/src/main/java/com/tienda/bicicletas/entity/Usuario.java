@@ -2,6 +2,7 @@ package com.tienda.bicicletas.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,8 +33,15 @@ public class Usuario {
 
     private String password;
 
+    // Recuperación de contraseña
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @Builder.Default
-    @ManyToMany(fetch = FetchType.EAGER) // para cargar los roles de inmedianto
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "usuarios_roles",
             joinColumns = @JoinColumn(name = "id_usuario"),
