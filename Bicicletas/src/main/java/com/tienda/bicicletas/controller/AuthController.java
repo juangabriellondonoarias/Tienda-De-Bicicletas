@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -24,10 +26,8 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(
-            summary = "Inicio de sesión",
-            description = "Valida las credenciales del usuario (email y password) y retorna un token JWT junto con el perfil del usuario (ID y Rol)."
-    )
+    @Operation(summary = "Inicio de sesión",
+            description = "Valida las credenciales del usuario y retorna un token JWT.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Login exitoso",
                     content = { @Content(mediaType = "application/json", schema = @Schema(implementation = LoginResponseDTO.class)) }),
@@ -39,17 +39,40 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
-    @Operation(
-            summary = "Registro de nuevo usuario",
-            description = "Crea un nuevo usuario en el sistema."
-    )
+
+    @Operation(summary = "Registro de nuevo usuario",
+            description = "Crea un nuevo usuario en el sistema.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuario creado con éxito"),
-            @ApiResponse(responseCode = "400", description = "Datos de registro inválidos o email ya existente"),
-            @ApiResponse(responseCode = "500", description = "Error interno al procesar el registro")
+            @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya existente")
     })
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody UsuarioRequestDTO request) {
         return ResponseEntity.ok(authService.registrar(request));
+    }
+
+    @Operation(summary = "Solicitar recuperación de contraseña",
+            description = "Envía un correo con un enlace único para restablecer la contraseña.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Correo enviado correctamente"),
+            @ApiResponse(responseCode = "404", description = "No existe cuenta con ese correo")
+    })
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> body) {
+        String email = body.get("email");
+        return ResponseEntity.ok(authService.forgotPassword(email));
+    }
+
+    @Operation(summary = "Restablecer contraseña",
+            description = "Valida el token recibido por email y actualiza la contraseña del usuario.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Contraseña actualizada"),
+            @ApiResponse(responseCode = "400", description = "Token inválido o expirado")
+    })
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        String nuevaPassword = body.get("newPassword");
+        return ResponseEntity.ok(authService.resetPassword(token, nuevaPassword));
     }
 }
