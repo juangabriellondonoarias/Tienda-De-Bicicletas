@@ -20,7 +20,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/movimientos")
-@CrossOrigin(origins = "*")
 @Tag(name = "Movimientos", description = "Operaciones para gestionar entradas y salidas de inventario")
 public class MovimientoController {
 

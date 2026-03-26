@@ -15,8 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/bicicletas")
-@CrossOrigin(origins = "http://localhost:4200") // Permiso explícito para Angular
+@RequestMapping("/api/bicicletas") //Permiso explícito para Angular
 @Tag(name = "Bicicletas", description = "Operaciones relacionadas con la gestion de bicicletas en la tienda ")
 public class    BicicletaController {
 
