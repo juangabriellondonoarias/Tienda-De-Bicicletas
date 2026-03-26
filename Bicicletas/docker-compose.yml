@@ -7,11 +7,7 @@ services:
     container_name: products-mysql
     restart: unless-stopped
     environment:
-<<<<<<< HEAD
-      MYSQL_ROOT_PASSWORD:
-=======
       MYSQL_ROOT_PASSWORD: JUAN1003
->>>>>>> 4d6a0ad57604581b160ed512db5d46db36684cdd
       MYSQL_DATABASE: tiendaBicicletas
       MYSQL_USER: juanycarlos
       MYSQL_PASSWORD: JuanYCarlos2026
@@ -19,10 +15,10 @@ services:
       - "3307:3306" # Acceso externo desde Workbench en el 3307
     volumes:
       - db_data:/var/lib/mysql
-      # Carga automática de tu script SQL (Asegúrate que la ruta a tu schema.sql sea correcta)
+      # Asegúrate de que este archivo existe en esa ruta para que cree las tablas al iniciar
       - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u juanycarlos -pJuanYCarlos2026 --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -37,11 +33,7 @@ services:
     environment:
       PMA_HOST: products-mysql
       PMA_USER: root
-<<<<<<< HEAD
-      PMA_PASSWORD:
-=======
       PMA_PASSWORD: JUAN1003
->>>>>>> 4d6a0ad57604581b160ed512db5d46db36684cdd
     ports:
       - "8081:80" # Acceso en http://localhost:8081
 
@@ -53,10 +45,9 @@ services:
     container_name: products-api
     depends_on:
       products-mysql:
-        condition: service_healthy # Espera a que el healthcheck de la DB pase
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      # Datos de conexión coincidiendo con los de arriba
       SPRING_DATASOURCE_URL: jdbc:mysql://products-mysql:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: juanycarlos
       SPRING_DATASOURCE_PASSWORD: JuanYCarlos2026
