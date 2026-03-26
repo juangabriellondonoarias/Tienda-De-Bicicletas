@@ -11,10 +11,7 @@ import java.util.List;
 @Repository
 public interface MovimientoRepository extends JpaRepository<Movimiento, Integer> {
 
-    @Query("SELECT m.bicicleta.tipo, SUM(m.cantidad) " +
-            "FROM Movimiento m " +
-            "WHERE m.proveedor = :nombreProveedor " +
-            "AND m.tipo = 'entrada' " +
-            "GROUP BY m.bicicleta.tipo")
     List<Object[]> reporteCantidadesPorTipo(@Param("nombreProveedor") String nombreProveedor);
+
+    // Consulta para Historial del Cliente
 }

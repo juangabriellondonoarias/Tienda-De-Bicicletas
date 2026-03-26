@@ -26,7 +26,7 @@ public class VentaController {
         this.ventaService = ventaService;
     }
 
-    // 1. REGISTRO POR VENDEDOR (Venta Asistida)
+    // 2. REGISTRO POR VENDEDOR (Venta Asistida)
     @Operation(summary = "Venta por Vendedor", description = "El vendedor registra la venta incluyendo su ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Venta creada por vendedor"),
@@ -35,18 +35,6 @@ public class VentaController {
     @PostMapping("/vendedor")
     public ResponseEntity<VentaResponseDTO> crearVentaVendedor(@RequestBody VentaRequestDTO request){
         VentaResponseDTO response = ventaService.registrarVenta(request);
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    // 2. COMPRA DIRECTA (Cliente / E-commerce)
-    @Operation(summary = "Compra Directa Cliente", description = "El cliente compra solo. No pide ID de vendedor")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Compra realizada con éxito"),
-            @ApiResponse(responseCode = "400", description = "Error en la compra")
-    })
-    @PostMapping("/cliente")
-    public ResponseEntity<VentaResponseDTO> crearCompraCliente(@RequestBody CompraClienteRequestDTO request){
-        VentaResponseDTO response = ventaService.registrarCompraDirecta(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 

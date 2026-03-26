@@ -70,6 +70,8 @@ public class MovimientoService {
                 .collect(Collectors.toList());
     }
 
+
+
     public List<Object[]> consultarProveedor(String proveedor) {
         // Llamamos al nuevo método del repositorio que usa GROUP BY
         List<Object[]> reporte = movimientoRepository.reporteCantidadesPorTipo(proveedor);

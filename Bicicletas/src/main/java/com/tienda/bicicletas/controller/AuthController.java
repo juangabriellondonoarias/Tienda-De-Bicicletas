@@ -4,6 +4,7 @@ import com.tienda.bicicletas.dto.auth.LoginRequestDTO;
 import com.tienda.bicicletas.dto.auth.LoginResponseDTO;
 import com.tienda.bicicletas.dto.request.UsuarioRequestDTO;
 import com.tienda.bicicletas.service.AuthService;
+import com.tienda.bicicletas.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +26,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final UsuarioService usuarioService;
 
     @Operation(summary = "Inicio de sesión",
             description = "Valida las credenciales del usuario y retorna un token JWT.")
@@ -57,10 +59,13 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Correo enviado correctamente"),
             @ApiResponse(responseCode = "404", description = "No existe cuenta con ese correo")
     })
+
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        return ResponseEntity.ok(authService.forgotPassword(email));
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        // Llamamos al servicio para que genere el token, lo guarde y envíe el correo
+        usuarioService.procesarRecuperacionPassword(email);
+        return ResponseEntity.ok(Map.of("message", "Correo enviado con éxito"));
     }
 
     @Operation(summary = "Restablecer contraseña",

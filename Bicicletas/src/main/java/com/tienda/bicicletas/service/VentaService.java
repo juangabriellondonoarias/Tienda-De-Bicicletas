@@ -4,13 +4,12 @@ import com.tienda.bicicletas.dto.request.CompraClienteRequestDTO;
 import com.tienda.bicicletas.dto.request.VentaRequestDTO;
 import com.tienda.bicicletas.dto.request.DetalleVentaRequestDTO;
 import com.tienda.bicicletas.dto.response.VentaResponseDTO;
-import com.tienda.bicicletas.entity.Bicicleta;
-import com.tienda.bicicletas.entity.DetalleVenta;
-import com.tienda.bicicletas.entity.Usuario;
-import com.tienda.bicicletas.entity.Venta;
+import com.tienda.bicicletas.entity.*;
+import com.tienda.bicicletas.enums.TipoMovimiento;
 import com.tienda.bicicletas.exception.ResourceNotFoundException;
 import com.tienda.bicicletas.mapper.VentaMapper;
 import com.tienda.bicicletas.repository.BicicletaRepository;
+import com.tienda.bicicletas.repository.MovimientoRepository;
 import com.tienda.bicicletas.repository.UsuarioRepository;
 import com.tienda.bicicletas.repository.VentaRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -26,15 +26,18 @@ public class VentaService {
     private final VentaRepository ventaRepository;
     private final UsuarioRepository usuarioRepository;
     private final BicicletaRepository bicicletaRepository;
+    private final MovimientoRepository movimientoRepository;
     private final VentaMapper ventaMapper;
 
     public VentaService(VentaRepository ventaRepository,
                         UsuarioRepository usuarioRepository,
                         BicicletaRepository bicicletaRepository,
+                        MovimientoRepository movimientoRepository,
                         VentaMapper ventaMapper) {
         this.ventaRepository = ventaRepository;
         this.usuarioRepository = usuarioRepository;
         this.bicicletaRepository = bicicletaRepository;
+        this.movimientoRepository = movimientoRepository;
         this.ventaMapper = ventaMapper;
     }
 
@@ -44,22 +47,10 @@ public class VentaService {
         Usuario vendedor = usuarioRepository.findById(request.getIdVendedor())
                 .orElseThrow(() -> new ResourceNotFoundException("Vendedor no encontrado con ID: " + request.getIdVendedor()));
 
-        // Aquí pasamos el documento, el vendedor y LA LISTA de detalles
         return procesarVentaBase(request.getDocumentoCliente(), vendedor, request.getDetalles());
     }
 
-    // --- 2. COMPRA DIRECTA DEL CLIENTE (E-commerce) ---
-    @Transactional
-    public VentaResponseDTO registrarCompraDirecta(CompraClienteRequestDTO request) {
-        // Buscamos un usuario que represente al "SISTEMA" o "TIENDA VIRTUAL"
-        // Supongamos que el ID 1 es tu administrador o tienda virtual
-        Usuario vendedorSistema = usuarioRepository.findById(1)
-                .orElse(null);
-
-        return procesarVentaBase(request.getDocumentoCliente(), vendedorSistema, request.getDetalles());
-    }
-
-    // --- 3. LÓGICA CENTRALIZADA (Atómica y Segura) ---
+    // --- 2. LÓGICA CENTRALIZADA (Original) ---
     private VentaResponseDTO procesarVentaBase(String documento, Usuario vendedor, List<DetalleVentaRequestDTO> detallesDTO) {
         Usuario cliente = usuarioRepository.findByDocumento(documento)
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente no encontrado con documento: " + documento));
@@ -77,11 +68,10 @@ public class VentaService {
 
             int cantidadSolicitada = (detalleDTO.getCantidad() != null) ? detalleDTO.getCantidad() : 1;
 
-            // Validación de Stock
+            // Validación de Stock (Básica)
             int stockActual = (bicicleta.getStock() != null) ? bicicleta.getStock() : 0;
             if (stockActual < cantidadSolicitada) {
-                throw new IllegalArgumentException("Stock insuficiente para: " + bicicleta.getModelo() +
-                        ". Disponible: " + stockActual);
+                throw new IllegalArgumentException("Stock insuficiente para: " + bicicleta.getModelo());
             }
 
             // Restar stock
