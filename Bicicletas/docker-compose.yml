@@ -1,7 +1,9 @@
 version: "3.9"
 
 services:
-  # --- 1. BASE DE DATOS (MySQL) ---
+  # --- 1. BASE DE DATOS LOCAL (OPCIONAL) ---
+  # Nota: Ya no es estrictamente necesaria porque usaremos Railway,
+  # pero la dejo por si quieres tener un respaldo local.
   products-mysql:
     image: mysql:8.0
     container_name: products-mysql
@@ -12,18 +14,16 @@ services:
       MYSQL_USER: juanycarlos
       MYSQL_PASSWORD: JuanYCarlos2026
     ports:
-      - "3307:3306" # Acceso externo desde Workbench en el 3307
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-      # Asegúrate de que este archivo existe en esa ruta para que cree las tablas al iniciar
-      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -u juanycarlos -pJuanYCarlos2026 --silent"]
       interval: 10s
       timeout: 5s
       retries: 10
 
-  # --- 2. ADMINISTRADOR VISUAL (phpMyAdmin) ---
+  # --- 2. ADMINISTRADOR VISUAL ---
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
@@ -35,22 +35,21 @@ services:
       PMA_USER: root
       PMA_PASSWORD: JUAN1003
     ports:
-      - "8081:80" # Acceso en http://localhost:8081
+      - "8081:80"
 
-  # --- 3. TU APLICACIÓN (Spring Boot) ---
+  # --- 3. TU APLICACIÓN (CORREGIDA PARA RAILWAY) ---
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: products-api
-    depends_on:
-      products-mysql:
-        condition: service_healthy
+    # Eliminamos la dependencia del mysql local para que no falle si el local está apagado
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      SPRING_DATASOURCE_URL: jdbc:mysql://products-mysql:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: juanycarlos
-      SPRING_DATASOURCE_PASSWORD: JuanYCarlos2026
+      # USAMOS LA URL PÚBLICA DE RAILWAY AQUÍ 👇
+      SPRING_DATASOURCE_URL: jdbc:mysql://crossover.proxy.rlwy.net:58771/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: aXuRIfHzdSwvlMWOMvuruucMkGIUycnH
     ports:
       - "8080:8080"
     restart: unless-stopped

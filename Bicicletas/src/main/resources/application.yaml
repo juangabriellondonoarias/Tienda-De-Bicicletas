@@ -3,32 +3,29 @@ spring:
     name: Bicicletas
 
   datasource:
-    # Ajusta el host y puerto si es necesario; el nombre de la DB debe ser igual al que creaste
-    url: jdbc:mysql://products-mysql:3306/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: juanycarlos        # Tu usuario de MySQL
-    password: JuanYCarlos2026 # Tu contraseña de MySQL
+    # 1. CAMBIA EL HOST Y EL PUERTO por los que te dio Railway en la pestaña "Variables"
+    # Se verá algo como: jdbc:mysql://mysql.railway.internal:3306/railway
+    url: jdbc:mysql://crossover.proxy.rlwy.net:58771/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: aXuRIfHzdSwvlMWOMvuruucMkGIUycnH
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: juangabriellondonoarias@gmail.com
-    password: 'ntqg xfja njib eoqw'
+    password: 'ntqg xfja njib eoqw' # Tu contraseña de aplicación de Gmail
     properties:
       mail.smtp.auth: "true"
       mail.smtp.starttls.enable: "true"
-      mail.smtp.connectiontimeout: 5000
-      mail.smtp.timeout: 5000
-      mail.smtp.writetimeout: 5000
 
   jpa:
     hibernate:
-      # 'update' valida y actualiza la estructura sin borrar tus datos existentes
       ddl-auto: update
-    show-sql: true        # Muestra las consultas en consola para depuración
+    show-sql: true
     properties:
       hibernate:
-        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
 
 security:
   jwt:
