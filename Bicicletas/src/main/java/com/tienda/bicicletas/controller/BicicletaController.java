@@ -61,10 +61,10 @@ public class    BicicletaController {
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
     })
 
-    @PostMapping("/lote-Bicicleta")
-    public ResponseEntity<String>registrarBicicletas(@RequestBody List<BicicletaRequestDTO> bicicletas){
-        bicicletaService.registrarBicicletas(bicicletas);
-        return ResponseEntity.ok("Se registraron" + bicicletas.size() + " bicicletas correctamente");
+    @PostMapping("/crear")
+    public ResponseEntity<String>registrarBicicletas(@RequestBody BicicletaRequestDTO bici){
+        bicicletaService.registrarUnaSolaBicicleta(bici);
+        return ResponseEntity.ok("Bicicleta creada correctamente");
     }
 
     // Actualizar una bicicleta existente
