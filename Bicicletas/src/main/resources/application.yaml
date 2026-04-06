@@ -3,18 +3,17 @@ spring:
     name: Bicicletas
 
   datasource:
-    # 1. CAMBIA EL HOST Y EL PUERTO por los que te dio Railway en la pestaña "Variables"
-    # Se verá algo como: jdbc:mysql://mysql.railway.internal:3306/railway
-    url: jdbc:mysql://crossover.proxy.rlwy.net:58771/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    # Si corres la App desde el IDE (IntelliJ), usa el puerto 3307
+    url: jdbc:mysql://localhost:3307/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: aXuRIfHzdSwvlMWOMvuruucMkGIUycnH
+    password: JUAN1003
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: juangabriellondonoarias@gmail.com
-    password: 'ntqg xfja njib eoqw' # Tu contraseña de aplicación de Gmail
+    password: 'ntqg xfja njib eoqw'
     properties:
       mail.smtp.auth: "true"
       mail.smtp.starttls.enable: "true"

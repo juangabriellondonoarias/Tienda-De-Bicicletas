@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-@NoArgsConstructor // Agrégale esto para que Jackson trabaje mejor
+@NoArgsConstructor
 public class LoginResponseDTO {
     private String token;
     private String type;

@@ -1,6 +1,7 @@
 package com.tienda.bicicletas.controller;
 import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
 import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
+import com.tienda.bicicletas.entity.Bicicleta;
 import com.tienda.bicicletas.service.BicicletaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -62,9 +63,9 @@ public class    BicicletaController {
     })
 
     @PostMapping("/crear")
-    public ResponseEntity<String>registrarBicicletas(@RequestBody BicicletaRequestDTO bici){
-        bicicletaService.registrarUnaSolaBicicleta(bici);
-        return ResponseEntity.ok("Bicicleta creada correctamente");
+    public ResponseEntity<Bicicleta>registrarBicicletas(@RequestBody BicicletaRequestDTO bici){
+        Bicicleta nuevaBici = bicicletaService.registrarUnaSolaBicicleta(bici);
+        return ResponseEntity.ok(nuevaBici);
     }
 
     // Actualizar una bicicleta existente
@@ -83,8 +84,8 @@ public class    BicicletaController {
     @Operation(summary = "Desactiva una Bicicleta", description = "Desactiva una bicicleta")
     @ApiResponse(responseCode = "204", description = "Bicicleta desactivada correctamente")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id){
+    public ResponseEntity<String> eliminar(@PathVariable Integer id){
         bicicletaService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Bicicleta marcada como inactiva");
     }
 }

@@ -1,57 +1,48 @@
 version: "3.9"
 
 services:
-  # --- 1. BASE DE DATOS LOCAL (OPCIONAL) ---
-  # Nota: Ya no es estrictamente necesaria porque usaremos Railway,
-  # pero la dejo por si quieres tener un respaldo local.
-  products-mysql:
+  # Base de Datos MySQL
+  db:
     image: mysql:8.0
     container_name: products-mysql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: JUAN1003
       MYSQL_DATABASE: tiendaBicicletas
-      MYSQL_USER: juanycarlos
-      MYSQL_PASSWORD: JuanYCarlos2026
     ports:
-      - "3307:3306"
+      - "3307:3306" # Tu PC lo ve en el 3307, Docker internamente en el 3306
     volumes:
       - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u juanycarlos -pJuanYCarlos2026 --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
 
-  # --- 2. ADMINISTRADOR VISUAL ---
+  # Administrador Visual (http://localhost:8081)
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: phpmyadmin
     restart: unless-stopped
     depends_on:
-      - products-mysql
+      - db
     environment:
-      PMA_HOST: products-mysql
+      PMA_HOST: db
       PMA_USER: root
       PMA_PASSWORD: JUAN1003
     ports:
       - "8081:80"
 
-  # --- 3. TU APLICACIÓN (CORREGIDA PARA RAILWAY) ---
+  # Tu Aplicación Spring Boot
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: products-api
-    # Eliminamos la dependencia del mysql local para que no falle si el local está apagado
-    environment:
-      SPRING_PROFILES_ACTIVE: docker
-      # USAMOS LA URL PÚBLICA DE RAILWAY AQUÍ 👇
-      SPRING_DATASOURCE_URL: jdbc:mysql://crossover.proxy.rlwy.net:58771/railway?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: aXuRIfHzdSwvlMWOMvuruucMkGIUycnH
+    depends_on:
+      - db
     ports:
       - "8080:8080"
+    environment:
+      # IMPORTANTE: Aquí apuntamos al nombre del servicio 'db'
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: JUAN1003
     restart: unless-stopped
 
 volumes:

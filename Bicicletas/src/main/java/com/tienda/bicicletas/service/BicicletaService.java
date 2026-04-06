@@ -38,7 +38,7 @@ public class BicicletaService {
     }*/
 
     @Transactional
-    public void registrarUnaSolaBicicleta(BicicletaRequestDTO dto) {
+    public Bicicleta registrarUnaSolaBicicleta(BicicletaRequestDTO dto) {
         // Creamos la entidad vacía
         Bicicleta nuevaBici = new Bicicleta();
 
@@ -52,7 +52,7 @@ public class BicicletaService {
         nuevaBici.setActivo("true"); // Asegúrate de marcarla como activa si es necesario
 
         // Guardamos en la base de datos
-        bicicletaRepository.save(nuevaBici);
+        return bicicletaRepository.save(nuevaBici);
     }
 
     public void eliminar(Integer id) {

@@ -99,7 +99,55 @@ public class VentaService {
         return ventaMapper.toResponseDTO(guardada);
     }
 
-    // --- OTROS MÉTODOS ---
+    @Transactional
+    public VentaResponseDTO registrarCompraCliente(CompraClienteRequestDTO request) {
+        // 1. Buscamos al usuario que está comprando
+        Usuario cliente = usuarioRepository.findById(request.getIdUsuario())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        // 2. Creamos la venta (En compras de cliente, el vendedor y cliente son el mismo o el vendedor es null)
+        Venta nuevaVenta = new Venta();
+        nuevaVenta.setCliente(cliente);
+        nuevaVenta.setVendedor(cliente); // O puedes dejarlo null si tu BD lo permite
+        nuevaVenta.setFecha(LocalDate.now());
+
+        BigDecimal total = BigDecimal.ZERO;
+
+        for (DetalleVentaRequestDTO detalleDTO : request.getDetalles()) {
+            Bicicleta bici = bicicletaRepository.findById(detalleDTO.getIdBicicleta())
+                    .orElseThrow(() -> new ResourceNotFoundException("Bicicleta no encontrada"));
+
+            // VALIDACIÓN Y DESCUENTO DE STOCK
+            int cantidad = detalleDTO.getCantidad();
+            if (bici.getStock() < cantidad) {
+                throw new IllegalArgumentException("No hay suficiente stock de: " + bici.getModelo());
+            }
+
+            bici.setStock(bici.getStock() - cantidad);
+            bicicletaRepository.save(bici);
+
+            // REGISTRO DE MOVIMIENTO (Para que el Admin lo vea)
+            Movimiento mov = new Movimiento();
+            mov.setBicicleta(bici);
+            mov.setTipo(TipoMovimiento.salida);
+            mov.setCantidad(cantidad);
+            mov.setFecha(LocalDateTime.now());
+            movimientoRepository.save(mov);
+
+            // Crear detalle de factura
+            DetalleVenta detalle = new DetalleVenta();
+            detalle.setBicicleta(bici);
+            detalle.setCantidad(cantidad);
+            detalle.setPrecioUnitario(bici.getValorUnitario());
+            detalle.setTotalDetalle(bici.getValorUnitario().multiply(new BigDecimal(cantidad)));
+
+            nuevaVenta.agregarDetalle(detalle);
+            total = total.add(detalle.getTotalDetalle());
+        }
+
+        nuevaVenta.setTotalVenta(total);
+        return ventaMapper.toResponseDTO(ventaRepository.save(nuevaVenta));
+    }
 
     @Transactional(readOnly = true)
     public List<VentaResponseDTO> obtenerLasVentas() {
