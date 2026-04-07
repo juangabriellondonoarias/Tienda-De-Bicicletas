@@ -15,7 +15,9 @@ import java.util.List;
 public interface DetalleVentaMapper {
     // 1. EL MÉTODO QUE TE FALTA (Este es el que busca el Service)
     @Mapping(source = "venta.idVenta", target = "idVenta")
-    @Mapping(source = "bicicleta.modelo", target = "nombreBicicleta")
+    @Mapping(target = "nombreBicicleta", expression = "java(detalleVenta.getBicicleta().getMarca() + \" \" + detalleVenta.getBicicleta().getModelo())")
+    @Mapping(source = "bicicleta.idBicicleta", target = "idBicicleta")
+    @Mapping(source = "bicicleta.codigo", target = "codigoBicicleta")
     DetalleVentaResponseDTO toResponseDTO(DetalleVenta detalleVenta);
 
     // 2. La lista (usará automáticamente el mapeo de arriba)

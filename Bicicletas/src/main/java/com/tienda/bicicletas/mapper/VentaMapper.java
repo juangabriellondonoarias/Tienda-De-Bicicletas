@@ -15,8 +15,10 @@ import java.util.List;
 public interface VentaMapper {
 
     // 1. Mapeo para la Respuesta (Response)
-    @Mapping(source = "cliente.nombre", target = "nombreCliente")
-    @Mapping(source = "cliente.documento", target = "documentoCliente")
+    // Priorizamos los campos snapshot de Venta, pero si son nulos (vieja data), extraemos del cliente
+    @Mapping(target = "nombreCliente", expression = "java(venta.getNombreCliente() != null ? venta.getNombreCliente() : (venta.getCliente() != null ? venta.getCliente().getNombre() : \"Usuario Registrado\"))")
+    @Mapping(target = "documentoCliente", expression = "java(venta.getDocumentoCliente() != null ? venta.getDocumentoCliente() : (venta.getCliente() != null ? venta.getCliente().getDocumento() : \"S/D\"))")
+    @Mapping(target = "email", expression = "java(venta.getEmail() != null ? venta.getEmail() : (venta.getCliente() != null ? venta.getCliente().getEmail() : \"\"))")
     @Mapping(source = "vendedor.nombre", target = "nombreVendedor")
     VentaResponseDTO toResponseDTO(Venta venta);
 

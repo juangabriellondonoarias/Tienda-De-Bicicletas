@@ -7,6 +7,8 @@ import com.tienda.bicicletas.entity.Usuario;
 import com.tienda.bicicletas.mapper.UsuarioMapper;
 import com.tienda.bicicletas.repository.RolRepository;
 import com.tienda.bicicletas.repository.UsuarioRepository;
+import com.tienda.bicicletas.repository.VentaRepository;
+import com.tienda.bicicletas.repository.MovimientoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,12 @@ public class UsuarioService {
 
     @Autowired
     private RolRepository rolRepository; // Necesario para guardar usuarios con rol
+
+    @Autowired
+    private VentaRepository ventaRepository;
+
+    @Autowired
+    private MovimientoRepository movimientoRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -62,11 +70,25 @@ public class UsuarioService {
         return usuarioMapper.toResposeDTO(usuarioRepository.save(entidad));
     }
 
+    @Transactional
     public void eliminar(Integer id){
         Usuario usuario = usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        usuario.setActivo(false);
-        usuarioRepository.save(usuario);
+        
+        // BORRADO INTELIGENTE:
+        // 1. ¿Tiene facturas?
+        boolean tieneVentas = ventaRepository.existsByClienteIdUsuario(id);
+        // 2. ¿Tiene movimientos de inventario? (Admin/Vendedor)
+        boolean tieneMovimientos = movimientoRepository.existsByUsuarioIdUsuario(id);
+
+        if (tieneVentas || tieneMovimientos) {
+            // Si tiene historia, solo desactivamos (Soft Delete)
+            usuario.setActivo(false);
+            usuarioRepository.save(usuario);
+        } else {
+            // Si está "limpio", lo borramos físicamente
+            usuarioRepository.delete(usuario);
+        }
     }
 
     // --- ESTE ES EL MÉTODO QUE LE FALTABA A TU ARCHIVO ---

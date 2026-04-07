@@ -13,4 +13,6 @@ public class LoginResponseDTO {
     private Integer userId;
     private Integer rolId;
     private String email;
+    private String nombre;
+    private String documento;
 }

@@ -58,7 +58,10 @@ public class VentaService {
         Venta nuevaVenta = new Venta();
         nuevaVenta.setVendedor(vendedor);
         nuevaVenta.setCliente(cliente);
-        nuevaVenta.setFecha(LocalDate.now());
+        nuevaVenta.setNombreCliente(cliente.getNombre());
+        nuevaVenta.setDocumentoCliente(cliente.getDocumento());
+        nuevaVenta.setEmail(cliente.getEmail());
+        nuevaVenta.setFecha(java.time.LocalDate.now(java.time.ZoneId.of("America/Bogota"))); // Usar horario local de Colombia
 
         BigDecimal acumuladorTotal = BigDecimal.ZERO;
 
@@ -75,8 +78,19 @@ public class VentaService {
             }
 
             // Restar stock
+            stockActual = (bicicleta.getStock() != null) ? bicicleta.getStock() : 0;
             bicicleta.setStock(stockActual - cantidadSolicitada);
             bicicletaRepository.save(bicicleta);
+
+            // REGISTRO DE MOVIMIENTO (Para que el Admin lo vea en el historial)
+            Movimiento mov = new Movimiento();
+            mov.setBicicleta(bicicleta);
+            mov.setTipo(TipoMovimiento.salida); // tipo "salida"
+            mov.setCantidad(cantidadSolicitada);
+            mov.setFecha(LocalDateTime.now());
+            mov.setUsuario(vendedor); // El admin que realiza la venta
+            mov.setProveedor("Venta POS: " + vendedor.getNombre() + " - CC: " + vendedor.getDocumento()); // Formato original
+            movimientoRepository.save(mov);
 
             // Crear el detalle
             DetalleVenta nuevoDetalle = new DetalleVenta();
@@ -109,7 +123,13 @@ public class VentaService {
         Venta nuevaVenta = new Venta();
         nuevaVenta.setCliente(cliente);
         nuevaVenta.setVendedor(cliente); // O puedes dejarlo null si tu BD lo permite
-        nuevaVenta.setFecha(LocalDate.now());
+        
+        // Priorizar datos enviados desde el frontend (que traen el nombre completo procesado)
+        nuevaVenta.setNombreCliente(request.getNombreCliente() != null ? request.getNombreCliente() : cliente.getNombre());
+        nuevaVenta.setDocumentoCliente(request.getDocumentoCliente() != null ? request.getDocumentoCliente() : cliente.getDocumento());
+        nuevaVenta.setEmail(cliente.getEmail());
+        
+        nuevaVenta.setFecha(java.time.LocalDate.now(java.time.ZoneId.of("America/Bogota"))); // Usar horario local de Colombia
 
         BigDecimal total = BigDecimal.ZERO;
 
@@ -132,6 +152,8 @@ public class VentaService {
             mov.setTipo(TipoMovimiento.salida);
             mov.setCantidad(cantidad);
             mov.setFecha(LocalDateTime.now());
+            mov.setUsuario(cliente); // IMPORTANTE: Vincular al cliente que compra
+            mov.setProveedor("Venta POS: " + cliente.getNombre() + " - CC: " + cliente.getDocumento()); // Formato original
             movimientoRepository.save(mov);
 
             // Crear detalle de factura

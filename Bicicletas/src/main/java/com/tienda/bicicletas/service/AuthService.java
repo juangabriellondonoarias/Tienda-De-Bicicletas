@@ -61,6 +61,10 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        if (usuario.getActivo() != null && !usuario.getActivo()) {
+            throw new RuntimeException("Esta cuenta ha sido desactivada. Contacta al administrador.");
+        }
+
         if (!passwordEncoder.matches(dto.getPassword(), usuario.getPassword())) {
             throw new RuntimeException("Contraseña incorrecta");
         }
@@ -72,7 +76,15 @@ public class AuthService {
 
         String token = jwtService.generateToken(usuario.getIdUsuario(), idRol, usuario.getEmail());
 
-        return new LoginResponseDTO(token, "Bearer", usuario.getIdUsuario(), idRol, usuario.getEmail());
+        return new LoginResponseDTO(
+            token, 
+            "Bearer", 
+            usuario.getIdUsuario(), 
+            idRol, 
+            usuario.getEmail(),
+            usuario.getNombre(),
+            usuario.getDocumento()
+        );
     }
 
     // ── Recuperar contraseña ──────────────────────────────────────────────────

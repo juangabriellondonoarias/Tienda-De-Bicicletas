@@ -37,6 +37,14 @@ public class VentaController {
         VentaResponseDTO response = ventaService.registrarVenta(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+    
+    // --- NUEVO: Endpoint para compras directas del cliente ---
+    @Operation(summary = "Venta por Cliente", description = "El cliente registra su propia compra")
+    @PostMapping
+    public ResponseEntity<VentaResponseDTO> crearCompraCliente(@RequestBody CompraClienteRequestDTO request){
+        VentaResponseDTO response = ventaService.registrarCompraCliente(request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
 
     // --- Los demás métodos se mantienen igual ---
 

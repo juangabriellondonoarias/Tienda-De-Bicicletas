@@ -14,6 +14,8 @@ import java.util.List;
 @Builder
 public class CompraClienteRequestDTO {
     private Integer idUsuario;
+    private String nombreCliente;
     private String documentoCliente;
+    private java.math.BigDecimal totalVenta;
     private List<DetalleVentaRequestDTO> detalles;
 }

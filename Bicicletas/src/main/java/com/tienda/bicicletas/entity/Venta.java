@@ -23,6 +23,15 @@ public class Venta {
     @Column(name = "id_venta")
     private Integer idVenta;
 
+    @Column(name = "nombre_cliente", length = 100)
+    private String nombreCliente;
+
+    @Column(name = "documento_cliente", length = 20)
+    private String documentoCliente;
+
+    @Column(name = "email_cliente", length = 100)
+    private String email;
+
     // --- CAMBIO AQUÍ: El que compra ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cliente", referencedColumnName = "id_usuario", nullable = false)
@@ -33,8 +42,7 @@ public class Venta {
     @JoinColumn(name = "id_vendedor", referencedColumnName = "id_usuario", nullable = false)
     private Usuario vendedor;
 
-    @Column(name= "fecha")
-    @CreationTimestamp
+    @Column(name = "fecha")
     private LocalDate fecha;
 
     @Column(name = "total_venta")

@@ -12,4 +12,6 @@ import java.util.List;
 public interface MovimientoRepository extends JpaRepository<Movimiento, Integer> {
     @Query(value = "SELECT tipo, SUM(cantidad) FROM movimientos WHERE tipo = :tipo GROUP BY tipo", nativeQuery = true)
     List<Object[]> reporteCantidadesPorTipo(@Param("tipo") String tipo);
+
+    boolean existsByUsuarioIdUsuario(Integer idUsuario);
 }

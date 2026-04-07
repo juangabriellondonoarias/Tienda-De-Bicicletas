@@ -57,11 +57,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
 
-                        // 4. VENTAS: Cliente compra, Admin ve todo
-                        .requestMatchers(HttpMethod.POST, "/api/ventas/cliente/**").hasAuthority("ROLE_CLIENTE")
-                        .requestMatchers("/api/ventas/**").hasAuthority("ROLE_ADMIN")
+                        // 4. VENTAS: Cliente compra, Admin ve todo (Ahora ambos pueden POST y GET)
+                        .requestMatchers("/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
 
-                        // 5. USUARIOS Y MOVIMIENTOS: Solo Administrador
+                        // 5. USUARIOS Y MOVIMIENTOS:
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").authenticated() // Cualquier logueado ve perfiles especificos
                         .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/api/movimientos/**").hasAuthority("ROLE_ADMIN")
 

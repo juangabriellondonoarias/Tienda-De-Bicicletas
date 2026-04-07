@@ -18,6 +18,7 @@ public class VentaResponseDTO {
     // Datos del Cliente (Lo que pediste)
     private String nombreCliente;
     private String documentoCliente;
+    private String email;
 
     // Datos del Vendedor (Para saber quién atendió)
     private String nombreVendedor;
