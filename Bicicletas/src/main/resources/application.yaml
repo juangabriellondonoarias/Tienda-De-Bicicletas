@@ -6,7 +6,7 @@ spring:
     # Prioriza las variables de Render; si no existen, usa tus credenciales de Railway
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://maglev.proxy.rlwy.net:39735/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
     username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:nKmbGDqoPzIVIUZdYkHTjrxbSKDdYBiN}
+    password: ${SPRING_DATASOURCE_PASSWORD:wIICeKCFsCYIPQxjbVmtoigFfRMmzIDB}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
