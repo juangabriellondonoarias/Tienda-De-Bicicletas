@@ -3,33 +3,40 @@ spring:
     name: Bicicletas
 
   datasource:
-    # Si corres la App desde el IDE (IntelliJ), usa el puerto 3307
-    url: jdbc:mysql://maglev.proxy.rlwy.net:39735/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
-    username: root
-    password: wIICeKCFsCYIPQxjbVmtoigFfRMmzIDB
+    # Prioriza las variables de Render; si no existen, usa tus credenciales de Railway
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://maglev.proxy.rlwy.net:39735/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:nKmbGDqoPzIVIUZdYkHTjrxbSKDdYBiN}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
     host: smtp.gmail.com
     port: 587
     username: juangabriellondonoarias@gmail.com
-    password: 'ntqg xfja njib eoqw'
+    # Mantiene tu contraseña de aplicación de Gmail
+    password: ${MAIL_PASSWORD:'ntqg xfja njib eoqw'}
     properties:
       mail.smtp.auth: "true"
       mail.smtp.starttls.enable: "true"
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
 
+# CONFIGURACIÓN OBLIGATORIA PARA DESPLIEGUE EN RENDER
+server:
+  port: ${PORT:8080}
+
 security:
   jwt:
-    secret-key: dGllbmRhLWJpY2ljbGV0YXMtc2VjcmV0LWtleS0yMDI2LXNlbmE=
+    # Usa tu clave secreta de la tienda
+    secret-key: ${JWT_SECRET:dGllbmRhLWJpY2ljbGV0YXMtc2VjcmV0LWtleS0yMDI2LXNlbmE=}
     token-expiration: 3600000
 
 app:
-  frontend-url: http://localhost:4200
+  # Permite que el frontend cambie según el entorno
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
