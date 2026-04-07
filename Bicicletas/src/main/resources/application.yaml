@@ -4,9 +4,9 @@ spring:
 
   datasource:
     # Si corres la App desde el IDE (IntelliJ), usa el puerto 3307
-    url: jdbc:mysql://localhost:3307/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://mysql.railway.internal:3306/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: JUAN1003
+    password: FcKakbSQRhadpiUFKVaKKqgLrKcCMkRG
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
