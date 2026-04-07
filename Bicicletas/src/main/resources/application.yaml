@@ -6,7 +6,7 @@ spring:
     # Si corres la App desde el IDE (IntelliJ), usa el puerto 3307
     url: jdbc:mysql://mysql.railway.internal:3306/railway?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: FcKakbSQRhadpiUFKVaKKqgLrKcCMkRG
+    password: nKmbGDqoPzIVIUZdYkHTjrxbSKDdYBiN
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
