@@ -92,24 +92,13 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://localhost:4200",
-                "http://localhost:5173",
-                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app",
-                "https://*.vercel.app"
-        ));
+        configuration.setAllowedOrigins(List.of("*"));
 
-        configuration.setAllowedMethods(List.of(
-                "GET",
-                "POST",
-                "PUT",
-                "DELETE",
-                "OPTIONS"
-        ));
+        configuration.setAllowedMethods(List.of("*"));
 
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control", "Accept", "X-Requested-With", "Origin"));
+        configuration.setAllowedHeaders(List.of("*"));
 
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
 
         configuration.setMaxAge(3600L);
 
