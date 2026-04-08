@@ -3,6 +3,7 @@ package com.tienda.bicicletas.service;
 import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
 import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
 import com.tienda.bicicletas.entity.Bicicleta;
+import com.tienda.bicicletas.enums.TipoBicicleta;
 import com.tienda.bicicletas.mapper.BicicletaMapper;
 import com.tienda.bicicletas.repository.BicicletaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,26 +33,28 @@ public class BicicletaService {
                 .map(bicicletaMapper::toResponseDTO);
     }
 
-    /*public BicicletaResponseDTO guardar(BicicletaRequestDTO request) {
-        Bicicleta entidad = bicicletaMapper.toEntity(request);
-        return bicicletaMapper.toResponseDTO(bicicletaRepository.save(entidad));
-    }*/
-
     @Transactional
     public Bicicleta registrarUnaSolaBicicleta(BicicletaRequestDTO dto) {
-        // Creamos la entidad vacía
         Bicicleta nuevaBici = new Bicicleta();
 
-        // La llenamos con los datos del DTO único
         nuevaBici.setCodigo(dto.getCodigo());
         nuevaBici.setMarca(dto.getMarca());
         nuevaBici.setModelo(dto.getModelo());
-        nuevaBici.setTipo(dto.getTipo());
-        nuevaBici.setStockMinimo(dto.getStockMinimo());
-        nuevaBici.setValorUnitario(dto.getValorUnitario());
-        nuevaBici.setActivo("true"); // Asegúrate de marcarla como activa si es necesario
 
-        // Guardamos en la base de datos
+        // Aseguramos que el tipo no sea null
+        if (dto.getTipo() != null) {
+            nuevaBici.setTipo(dto.getTipo());
+        }
+
+        // OJO: Agrega el stock inicial si lo mandas desde el front
+        // Como tu DTO no tiene 'stock', puedes usar stockMinimo o agregarlo al DTO
+        nuevaBici.setStock(0); // O el valor que desees por defecto
+
+        nuevaBici.setStockMinimo(dto.getStockMinimo() != null ? dto.getStockMinimo() : 5);
+        nuevaBici.setValorUnitario(dto.getValorUnitario());
+        nuevaBici.setActivo("true");
+        nuevaBici.setImagen(dto.getImagen());
+
         return bicicletaRepository.save(nuevaBici);
     }
 
@@ -63,10 +66,14 @@ public class BicicletaService {
     }
 
     public Optional<BicicletaResponseDTO> actualizar(Integer id, BicicletaRequestDTO request) {
-        // Cambiamos findById por findByIdAndActivo para ignorar las borradas
         return bicicletaRepository.findByIdBicicletaAndActivo(id, "true").map(existente -> {
-            // MapStruct actualiza los campos permitidos
             bicicletaMapper.updateEntityFromDto(request, existente);
+
+            // Si actualizas y mandas una foto nueva, se guarda aquí
+            if (request.getImagen() != null) {
+                existente.setImagen(request.getImagen());
+            }
+
             return bicicletaMapper.toResponseDTO(bicicletaRepository.save(existente));
         });
     }

@@ -7,7 +7,7 @@ services:
     container_name: products-mysql
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: JUAN1003
+      MYSQL_ROOT_PASSWORD: Carlos2515.
       MYSQL_DATABASE: tiendaBicicletas
     ports:
       - "3307:3306" # Tu PC lo ve en el 3307, Docker internamente en el 3306
@@ -24,7 +24,7 @@ services:
     environment:
       PMA_HOST: db
       PMA_USER: root
-      PMA_PASSWORD: JUAN1003
+      PMA_PASSWORD: Carlos2515.
     ports:
       - "8081:80"
 
@@ -42,7 +42,7 @@ services:
       # IMPORTANTE: Aquí apuntamos al nombre del servicio 'db'
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: JUAN1003
+      SPRING_DATASOURCE_PASSWORD: Carlos2515.
     restart: unless-stopped
 
 volumes:

@@ -21,4 +21,5 @@ public class BicicletaResponseDTO {
     private Integer stockMinimo;
     private BigDecimal valorUnitario;
     private String activo;
+    private String imagen;
 }

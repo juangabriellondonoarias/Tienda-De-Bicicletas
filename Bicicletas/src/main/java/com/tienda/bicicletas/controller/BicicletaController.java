@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/bicicletas") //Permiso explícito para Angular
@@ -63,9 +64,10 @@ public class    BicicletaController {
     })
 
     @PostMapping("/crear")
-    public ResponseEntity<Bicicleta>registrarBicicletas(@RequestBody BicicletaRequestDTO bici){
-        Bicicleta nuevaBici = bicicletaService.registrarUnaSolaBicicleta(bici);
-        return ResponseEntity.ok(nuevaBici);
+    public ResponseEntity<Bicicleta> registrarBicicletas(@RequestBody BicicletaRequestDTO biciDto) {
+        // Si la imagen viene en el DTO, el service se encargará de pasarla a la Entity
+        Bicicleta nuevaBici = bicicletaService.registrarUnaSolaBicicleta(biciDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(nuevaBici);
     }
 
     // Actualizar una bicicleta existente
