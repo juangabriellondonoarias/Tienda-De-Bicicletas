@@ -21,12 +21,23 @@ public class JwtValidationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
 
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        // Si la ruta empieza por /api/auth/, NO se aplica este filtro
+        return path.startsWith("/api/auth/");
+    }
+
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
+        // Si no hay token, dejamos pasar a la siguiente etapa (Spring Security decidirá si rebota o no)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
@@ -40,41 +51,40 @@ public class JwtValidationFilter extends OncePerRequestFilter {
                 Integer userId = jwtService.extractUserId(token);
                 Integer rolId = jwtService.extractRolId(token);
 
-                // 1. Mapear el ID del rol a la autoridad de Spring
-                // IMPORTANTE: Asegúrate de que coincida con "ROLE_ADMIN" en tu SecurityConfig
+                // Mapeo de roles para que coincida con tu SecurityConfig
                 String nombreRol = (rolId == 1) ? "ROLE_ADMIN" : "ROLE_CLIENTE";
                 List<SimpleGrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(nombreRol));
 
-                // 2. Crear el objeto de autenticación
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         email,
                         null,
                         authorities
                 );
 
-                // 3. ESTABLECER LA AUTENTICACIÓN EN EL CONTEXTO (Esto quita el 403)
                 SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                // 4. Guardar atributos extra para uso interno si lo deseas
-                request.setAttribute("email", email);
+                // Guardar atributos para uso en controladores si es necesario
                 request.setAttribute("userId", userId);
                 request.setAttribute("rolId", rolId);
-
-                filterChain.doFilter(request, response);
             } else {
+                // Si el token no es válido, enviamos 401 y cortamos la cadena
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 response.getWriter().write("Token expirado o inválido");
+                return;
             }
         } catch (Exception e) {
-            // Limpiar el contexto si algo falla para mayor seguridad
             SecurityContextHolder.clearContext();
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return; // IMPORTANTE: Cortar ejecución aquí
         }
+
+        // ⚠️ SOLO UN doFilter AL FINAL para las peticiones exitosas o sin token
+        filterChain.doFilter(request, response);
     }
 
-    @Override
+    /*@Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
         return path.startsWith("/api/auth/") || path.contains("swagger") || path.contains("v3/api-docs");
-    }
+    }*/
 }

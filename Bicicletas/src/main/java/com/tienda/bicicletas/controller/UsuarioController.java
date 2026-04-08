@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
+@CrossOrigin(origins = {"http://localhost:4200", "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"})
 @Tag(name = "Usuarios", description = "Gestion de clientes y administradores")
 public class UsuarioController {
 

@@ -1,24 +1,22 @@
 package com.tienda.bicicletas.controller;
-
 import com.tienda.bicicletas.dto.request.BicicletaRequestDTO;
 import com.tienda.bicicletas.dto.response.BicicletaResponseDTO;
+import com.tienda.bicicletas.entity.Bicicleta;
 import com.tienda.bicicletas.service.BicicletaService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/bicicletas")
-@CrossOrigin(origins = "*")
+@RequestMapping("/api/bicicletas") //Permiso explícito para Angular
+@CrossOrigin(origins = {"http://localhost:4200", "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"})
 @Tag(name = "Bicicletas", description = "Operaciones relacionadas con la gestion de bicicletas en la tienda ")
 public class    BicicletaController {
 
@@ -64,10 +62,10 @@ public class    BicicletaController {
             @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos")
     })
 
-    @PostMapping("/lote-Bicicleta")
-    public ResponseEntity<String>registrarBicicletas(@RequestBody List<BicicletaRequestDTO> bicicletas){
-        bicicletaService.registrarBicicletas(bicicletas);
-        return ResponseEntity.ok("Se registraron" + bicicletas.size() + " bicicletas correctamente");
+    @PostMapping("/crear")
+    public ResponseEntity<Bicicleta>registrarBicicletas(@RequestBody BicicletaRequestDTO bici){
+        Bicicleta nuevaBici = bicicletaService.registrarUnaSolaBicicleta(bici);
+        return ResponseEntity.ok(nuevaBici);
     }
 
     // Actualizar una bicicleta existente
@@ -86,8 +84,8 @@ public class    BicicletaController {
     @Operation(summary = "Desactiva una Bicicleta", description = "Desactiva una bicicleta")
     @ApiResponse(responseCode = "204", description = "Bicicleta desactivada correctamente")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id){
+    public ResponseEntity<String> eliminar(@PathVariable Integer id){
         bicicletaService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Bicicleta marcada como inactiva");
     }
 }

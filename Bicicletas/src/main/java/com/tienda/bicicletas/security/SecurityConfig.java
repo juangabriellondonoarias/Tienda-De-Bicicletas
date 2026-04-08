@@ -4,14 +4,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -23,44 +31,94 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
+
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
-                        // 1. RUTAS PÚBLICAS: Login, Registro y Documentación
-                        .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
-                        // 2. PERMISOS DE CLIENTE (Y ADMIN): Lo que el cliente PUEDE hacer
-                        // Listar bicicletas (GET)
-                        .requestMatchers(HttpMethod.GET, "/api/bicicletas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
-                        // Crear su propia venta (POST) y ver su historial (GET)
-                        .requestMatchers(HttpMethod.GET, "/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
-                        .requestMatchers(HttpMethod.POST, "/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
+                        // PUBLICOS
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
 
-                        // 3. PERMISOS EXCLUSIVOS DE ADMIN: Todo lo demás
-                        // Gestión de Inventario (Crear, Editar, Eliminar Bicicletas)
+                        // IMPORTANTE PARA CORS
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // BICICLETAS
+                        .requestMatchers(HttpMethod.GET, "/api/bicicletas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
 
+                        // VENTAS
+                        .requestMatchers("/api/ventas/**")
+                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
 
-                        // Gestión de Movimientos (Entradas y Salidas de bodega)
-                        .requestMatchers("/api/movimientos/**").hasAuthority("ROLE_ADMIN")
+                        // USUARIOS
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}")
+                        .authenticated()
 
-                        // Gestión de Usuarios (CRUD interno de empleados/clientes)
-                        .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/usuarios/**")
+                        .hasAuthority("ROLE_ADMIN")
 
-                        // Gestión de Detalles de Venta (Si se usa de forma individual)
-                        .requestMatchers("/api/detalles-ventas/**").hasAuthority("ROLE_ADMIN")
+                        // MOVIMIENTOS
+                        .requestMatchers("/api/movimientos/**")
+                        .hasAuthority("ROLE_ADMIN")
 
-                        // 4. CUALQUIER OTRA RUTA: Requiere Admin por seguridad
-                        .anyRequest().hasAuthority("ROLE_ADMIN")
-                )
-                .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                        .anyRequest().authenticated()
+                );
+
+        // JWT FILTER
+        http.addFilterBefore(
+                jwtValidationFilter,
+                UsernamePasswordAuthenticationFilter.class
+        );
+
+        return http.build();
     }
+
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:4200",
+                "http://localhost:5173",
+                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app",
+                "https://*.vercel.app"
+        ));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
+        configuration.setAllowCredentials(true);
+
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
+        source.registerCorsConfiguration("/**", configuration);
+
+        return source;
+    }
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

@@ -38,24 +38,21 @@ public class BicicletaService {
     }*/
 
     @Transactional
-    public void registrarBicicletas(List<BicicletaRequestDTO> listaBicicletas) {
+    public Bicicleta registrarUnaSolaBicicleta(BicicletaRequestDTO dto) {
+        // Creamos la entidad vacía
+        Bicicleta nuevaBici = new Bicicleta();
 
-        for (BicicletaRequestDTO dto : listaBicicletas) {
+        // La llenamos con los datos del DTO único
+        nuevaBici.setCodigo(dto.getCodigo());
+        nuevaBici.setMarca(dto.getMarca());
+        nuevaBici.setModelo(dto.getModelo());
+        nuevaBici.setTipo(dto.getTipo());
+        nuevaBici.setStockMinimo(dto.getStockMinimo());
+        nuevaBici.setValorUnitario(dto.getValorUnitario());
+        nuevaBici.setActivo("true"); // Asegúrate de marcarla como activa si es necesario
 
-            // Creamos la entidad vacía
-            Bicicleta nuevaBici = new Bicicleta();
-
-            // La llenamos con los datos que vienen del DTO
-            nuevaBici.setCodigo(dto.getCodigo());
-            nuevaBici.setMarca(dto.getMarca());
-            nuevaBici.setModelo(dto.getModelo());
-            nuevaBici.setTipo(dto.getTipo());
-            nuevaBici.setStockMinimo(dto.getStockMinimo());
-            nuevaBici.setValorUnitario(dto.getValorUnitario());
-
-            // Guardamos en la base de datos
-            bicicletaRepository.save(nuevaBici);
-        }
+        // Guardamos en la base de datos
+        return bicicletaRepository.save(nuevaBici);
     }
 
     public void eliminar(Integer id) {

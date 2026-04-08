@@ -13,6 +13,8 @@ public class DetalleVentaResponseDTO {
 
     private Integer idDetalleVenta;
     private Integer idVenta;
+    private Integer idBicicleta;
+    private String codigoBicicleta;
     private String nombreBicicleta; // se extrae el nombre para el fronted
     private Integer cantidad;
     private BigDecimal precioUnitario;

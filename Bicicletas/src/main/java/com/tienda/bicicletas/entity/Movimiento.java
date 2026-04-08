@@ -39,5 +39,6 @@ public class Movimiento {
 
     @Column(name = "proveedor" )
     private String proveedor;
-
+    
+    // Nueva Relación para Trazabilidad: Link con la venta
 }

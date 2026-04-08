@@ -20,7 +20,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/movimientos")
-@CrossOrigin(origins = "*")
 @Tag(name = "Movimientos", description = "Operaciones para gestionar entradas y salidas de inventario")
 public class MovimientoController {
 
@@ -39,11 +38,12 @@ public class MovimientoController {
         return ResponseEntity.ok("Movimiento registrado correctamente");
     }
 
-    @Operation(summary = "Listar historial de moviminetos", description = "Obtiene una lista de todos los movimientos (entradas y salidas) registrados")
     @GetMapping
     public ResponseEntity<List<MovimientoResponseDTO>> listar(){
         return ResponseEntity.ok(movimientoService.listarTodos());
     }
+
+
 
     @GetMapping("/cantidad-comprada")
     public ResponseEntity<List<Object[]>> consultar(@RequestParam String proveedor) {

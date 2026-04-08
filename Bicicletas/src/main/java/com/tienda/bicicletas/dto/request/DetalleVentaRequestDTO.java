@@ -16,5 +16,7 @@ public class DetalleVentaRequestDTO {
     @NotNull(message = "El ID de la bicicleta es obligatorio")
     private Integer idBicicleta;
 
+    @NotNull(message = "La cantidad de bicicleta es obligatorio")
+    private Integer cantidad;
 
 }

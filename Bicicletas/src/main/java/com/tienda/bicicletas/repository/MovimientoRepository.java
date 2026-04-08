@@ -10,11 +10,8 @@ import java.util.List;
 
 @Repository
 public interface MovimientoRepository extends JpaRepository<Movimiento, Integer> {
+    @Query(value = "SELECT tipo, SUM(cantidad) FROM movimientos WHERE tipo = :tipo GROUP BY tipo", nativeQuery = true)
+    List<Object[]> reporteCantidadesPorTipo(@Param("tipo") String tipo);
 
-    @Query("SELECT m.bicicleta.tipo, SUM(m.cantidad) " +
-            "FROM Movimiento m " +
-            "WHERE m.proveedor = :nombreProveedor " +
-            "AND m.tipo = 'entrada' " +
-            "GROUP BY m.bicicleta.tipo")
-    List<Object[]> reporteCantidadesPorTipo(@Param("nombreProveedor") String nombreProveedor);
+    boolean existsByUsuarioIdUsuario(Integer idUsuario);
 }
