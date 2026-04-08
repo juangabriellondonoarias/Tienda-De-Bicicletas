@@ -37,4 +37,8 @@ public class Bicicleta {
     private BigDecimal valorUnitario;
 
     private String activo = "true";
+
+    @Lob
+    @Column(name = "imagen", columnDefinition = "LONGTEXT")
+    private String imagen; // Ahora es un String para mayor facilidad en Angular
 }
