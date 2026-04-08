@@ -107,7 +107,7 @@ public class SecurityConfig {
                 "OPTIONS"
         ));
 
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control", "Accept", "X-Requested-With", "Origin"));
 
         configuration.setAllowCredentials(true);
 
