@@ -76,17 +76,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Reemplaza con tu URL exacta de Vercel que se ve en la imagen
-        configuration.setAllowedOrigins(Arrays.asList("https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"));
+        // Agregamos la URL con y sin barra final, y local por si acaso
+        configuration.setAllowedOriginPatterns(Arrays.asList(
+                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app",
+                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app/"
+        ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // Cache de 1 hora para el preflight
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
