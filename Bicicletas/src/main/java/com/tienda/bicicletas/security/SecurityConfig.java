@@ -14,12 +14,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
 
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -32,13 +31,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return http
-                // 1. Activar CORS con la configuración que creamos abajo
+
+        http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
-                        // 1. RUTAS PÚBLICAS (Login, Registro y Swagger)
+
+                        // PUBLICOS
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/v3/api-docs/**",
@@ -48,46 +50,75 @@ public class SecurityConfig {
                                 "/webjars/**"
                         ).permitAll()
 
-                        // 2. VITAL: Permitir OPTIONS en TODAS las rutas para evitar errores de CORS
+                        // IMPORTANTE PARA CORS
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // 3. BICICLETAS: Ver (GET) es público, modificar (POST, PUT, DELETE) es solo ADMIN
+                        // BICICLETAS
                         .requestMatchers(HttpMethod.GET, "/api/bicicletas/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/bicicletas/**").hasAuthority("ROLE_ADMIN")
 
-                        // 4. VENTAS: Cliente compra, Admin ve todo (Ahora ambos pueden POST y GET)
-                        .requestMatchers("/api/ventas/**").hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
+                        // VENTAS
+                        .requestMatchers("/api/ventas/**")
+                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_CLIENTE")
 
-                        // 5. USUARIOS Y MOVIMIENTOS:
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}").authenticated() // Cualquier logueado ve perfiles especificos
-                        .requestMatchers("/api/usuarios/**").hasAuthority("ROLE_ADMIN")
-                        .requestMatchers("/api/movimientos/**").hasAuthority("ROLE_ADMIN")
+                        // USUARIOS
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/{id}")
+                        .authenticated()
 
-                        // Cualquier otra ruta requiere estar logueado
+                        .requestMatchers("/api/usuarios/**")
+                        .hasAuthority("ROLE_ADMIN")
+
+                        // MOVIMIENTOS
+                        .requestMatchers("/api/movimientos/**")
+                        .hasAuthority("ROLE_ADMIN")
+
                         .anyRequest().authenticated()
-                )
-                // 2. Tu filtro de JWT
-                .addFilterBefore(jwtValidationFilter, UsernamePasswordAuthenticationFilter.class)
-                .build();
+                );
+
+        // JWT FILTER
+        http.addFilterBefore(
+                jwtValidationFilter,
+                UsernamePasswordAuthenticationFilter.class
+        );
+
+        return http.build();
     }
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permite el origen de tu frontend local y el de producción
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:4200", "http://localhost:62458"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
+
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://localhost:4200",
+                "http://localhost:5173",
+                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app",
+                "https://*.vercel.app"
+        ));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+
+        configuration.setAllowedHeaders(List.of("*"));
+
         configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+
         source.registerCorsConfiguration("/**", configuration);
+
         return source;
     }
+
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

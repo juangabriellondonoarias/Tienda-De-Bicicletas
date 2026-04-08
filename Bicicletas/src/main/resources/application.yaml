@@ -6,7 +6,7 @@ spring:
     # Si corres la App desde el IDE (IntelliJ), usa el puerto 3307
     url: jdbc:mysql://localhost:3307/tiendaBicicletas?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true
     username: root
-    password: Carlos2515.
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   mail:
