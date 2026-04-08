@@ -76,15 +76,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList(
-                "http://localhost:4200",
-                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"
-        ));
+        // Reemplaza con tu URL exacta de Vercel que se ve en la imagen
+        configuration.setAllowedOrigins(Arrays.asList("https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-
-        // CAMBIO IMPORTANTE: Permitir todas las cabeceras
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
