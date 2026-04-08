@@ -78,8 +78,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         // Agregamos la URL con y sin barra final, y local por si acaso
         configuration.setAllowedOriginPatterns(Arrays.asList(
-                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app",
-                "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app/"
+                "http://localhost:*",
+                "https://*.vercel.app"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
@@ -90,6 +90,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }

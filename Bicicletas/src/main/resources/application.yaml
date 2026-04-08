@@ -14,7 +14,7 @@ spring:
     port: 587
     username: juangabriellondonoarias@gmail.com
     # Mantiene tu contraseña de aplicación de Gmail
-    password: ${MAIL_PASSWORD:'ntqg xfja njib eoqw'}
+    password: ${MAIL_PASSWORD:ntqgxfjanjibeoqw}
     properties:
       mail.smtp.auth: "true"
       mail.smtp.starttls.enable: "true"
