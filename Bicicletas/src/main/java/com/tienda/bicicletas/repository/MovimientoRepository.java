@@ -14,4 +14,6 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Integer>
     List<Object[]> reporteCantidadesPorTipo(@Param("tipo") String tipo);
 
     boolean existsByUsuarioIdUsuario(Integer idUsuario);
+
+    List<Movimiento> findByFechaBetween(java.time.LocalDateTime start, java.time.LocalDateTime end);
 }

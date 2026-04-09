@@ -21,6 +21,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = {"http://localhost:4200", "https://frontend-tienda-bicicletas-s3b8-zeta.vercel.app"})
 @Tag(name = "Autenticación", description = "Endpoints para el manejo de acceso, registro de usuarios y generación de tokens JWT")
 public class AuthController {
 

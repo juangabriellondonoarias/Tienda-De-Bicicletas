@@ -39,6 +39,7 @@ services:
     ports:
       - "8080:8080"
     environment:
+      SPRING_PROFILES_ACTIVE: local   # ← ESTA LINEA ES LA IMPORTANTE
       # IMPORTANTE: Aquí apuntamos al nombre del servicio 'db'
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/tiendaBicicletas?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
