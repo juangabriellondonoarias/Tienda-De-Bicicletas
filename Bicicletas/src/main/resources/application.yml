@@ -7,7 +7,7 @@ spring:
   application:
     name: Bicicletas
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
 
   jpa:
     hibernate:
