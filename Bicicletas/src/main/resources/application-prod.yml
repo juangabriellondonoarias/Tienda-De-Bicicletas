@@ -1,8 +1,11 @@
 spring:
   datasource:
-    url: ${SPRING_DATASOURCE_URL}
-    username: ${SPRING_DATASOURCE_USERNAME}
-    password: ${SPRING_DATASOURCE_PASSWORD}
+    # URL completa de tu base de datos en Railway
+    url: jdbc:mysql://maglev.proxy.rlwy.net:39735/railway
+    username: root
+    password: wIICeKCFsCYIPQxjbVmtoigFfRMmzIDB
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
 app:
-  frontend-url: ${FRONTEND_URL}
+  # Esta es la URL de tu frontend en Vercel para el CORS
+  frontend-url: https://frontend-tienda-bicicletas.vercel.app
