@@ -7,5 +7,4 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 app:
-  # Esta es la URL de tu frontend en Vercel para el CORS
   frontend-url: https://frontend-tienda-bicicletas.vercel.app
