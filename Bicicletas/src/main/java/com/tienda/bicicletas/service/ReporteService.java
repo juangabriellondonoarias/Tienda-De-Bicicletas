@@ -11,6 +11,8 @@ public interface ReporteService {
     
     List<InventarioReporteDTO> obtenerInventario(ReporteFiltroDTO filtro);
     
+    List<MovimientoReporteDTO> obtenerMovimientos(ReporteFiltroDTO filtro);
+    
     List<ClienteReporteDTO> obtenerClientesMasCompras();
     
     ResumenEjecutivoDTO obtenerResumenEjecutivo();

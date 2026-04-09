@@ -5,6 +5,7 @@ import com.tienda.bicicletas.entity.Bicicleta;
 import com.tienda.bicicletas.entity.Venta;
 import com.tienda.bicicletas.exception.ReporteGeneracionException;
 import com.tienda.bicicletas.repository.BicicletaRepository;
+import com.tienda.bicicletas.repository.MovimientoRepository;
 import com.tienda.bicicletas.repository.ReporteRepository;
 import com.tienda.bicicletas.repository.UsuarioRepository;
 import com.tienda.bicicletas.service.ReporteService;
@@ -30,6 +31,7 @@ public class ReporteServiceImpl implements ReporteService {
     private final ReporteRepository reporteRepository;
     private final BicicletaRepository bicicletaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MovimientoRepository movimientoRepository;
     private final ReporteFactory reporteFactory;
 
     @Override
@@ -108,6 +110,24 @@ public class ReporteServiceImpl implements ReporteService {
     }
 
     @Override
+    public List<MovimientoReporteDTO> obtenerMovimientos(ReporteFiltroDTO filtro) {
+        LocalDate inicio = filtro.getFechaInicio() != null ? filtro.getFechaInicio() : LocalDate.now().minusDays(30);
+        LocalDate fin = filtro.getFechaFin() != null ? filtro.getFechaFin() : LocalDate.now();
+
+        return movimientoRepository.findByFechaBetween(inicio.atStartOfDay(), fin.atTime(23, 59, 59)).stream()
+                .map(m -> MovimientoReporteDTO.builder()
+                        .idMovimiento(m.getIdMovimiento())
+                        .fecha(m.getFecha())
+                        .tipo(m.getTipo() != null ? m.getTipo().toString() : "S/N")
+                        .bicicleta(m.getBicicleta() != null ? (m.getBicicleta().getMarca() + " " + m.getBicicleta().getModelo()) : "S/N")
+                        .cantidad(m.getCantidad())
+                        .proveedor(m.getProveedor() != null ? m.getProveedor() : "S/N")
+                        .usuarioResponsable(m.getUsuario() != null ? m.getUsuario().getNombre() : "S/N")
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public ResponseEntity<byte[]> exportarReporte(String tipo, ReporteFiltroDTO filtro) {
         String titulo;
         String[] columnas;
@@ -122,17 +142,25 @@ public class ReporteServiceImpl implements ReporteService {
                 }
                 break;
             case "INVENTARIO":
-                titulo = "Estado de Inventario General";
+                titulo = "Catálogo y Estado de Inventario";
                 columnas = new String[]{"Código", "Producto", "Cat.", "Stock", "Precio", "Valor Total", "Estado"};
                 for (InventarioReporteDTO i : obtenerInventario(filtro)) {
                     filas.add(new Object[]{i.getCodigo(), i.getMarca() + " " + i.getModelo(), i.getCategoria(), i.getStockActual(), i.getPrecio(), i.getValorTotal(), i.getEstadoStock()});
                 }
                 break;
+            case "USUARIOS":
             case "CLIENTES":
-                titulo = "Reporte de Clientes VIP";
+                titulo = "Directorio de Usuarios y Clientes VIP";
                 columnas = new String[]{"Nombre", "Documento", "Email", "Total Compras", "Monto Gastado", "Ultima Compra"};
                 for (ClienteReporteDTO c : obtenerClientesMasCompras()) {
                     filas.add(new Object[]{c.getNombre(), c.getDocumento(), c.getEmail(), c.getTotalCompras(), c.getMontoTotalGastado(), c.getUltimaCompra()});
+                }
+                break;
+            case "MOVIMIENTOS":
+                titulo = "Auditoría de Entradas y Salidas (Movimientos)";
+                columnas = new String[]{"ID", "Fecha", "Tipo", "Bicicleta", "Cant.", "Proveedor", "Responsable"};
+                for (MovimientoReporteDTO m : obtenerMovimientos(filtro)) {
+                    filas.add(new Object[]{m.getIdMovimiento(), m.getFecha(), m.getTipo(), m.getBicicleta(), m.getCantidad(), m.getProveedor(), m.getUsuarioResponsable()});
                 }
                 break;
             default:
